@@ -1,0 +1,21 @@
+Day 15: Stock Records REST API Design
+
+Base URL: `/api/records`
+
+Endpoints & CRUD Mapping
+
+| Method | Endpoint | CRUD Action | Description | Expected Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **GET** | `/api/records` | Read (All) | Fetch all stock records | `200 OK` |
+| **GET** | `/api/records/:id` | Read (One) | Fetch a specific record by ID | `200 OK` / `404 Not Found` |
+| **POST** | `/api/records` | Create | Add a new stock record | `201 Created` / `400 Bad Request` |
+| **PUT** | `/api/records/:id` | Update (Full) | Overwrite an entire record | `200 OK` / `400 Bad Request` |
+| **DELETE** | `/api/records/:id` | Delete | Remove a stock record | `204 No Content` / `404 Not Found` |
+
+Mock Request Body (`POST` / `PUT`)
+```json
+{
+  "ticker": "NVDA",
+  "shares": 10,
+  "buyPrice": 120.50
+}
