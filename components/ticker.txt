@@ -1,0 +1,180 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  LineChart, Line, BarChart, Bar, Cell,
+  XAxis, YAxis, Tooltip, Legend, CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
+
+const AVAILABLE_TICKERS = ["AAPL", "MSFT", "GOOGL", "TSLA", "NVDA"];
+const COLORS: Record<string, string> = {
+  AAPL: "#c2436f",
+  MSFT: "#2563eb",
+  GOOGL: "#16a34a",
+  TSLA: "#ea580c",
+  NVDA: "#7c3aed",
+};
+
+type HistoryPoint = { date: string; close: number };
+type MergedPoint = { date: string; [ticker: string]: number | string };
+
+function mergeHistories(histories: Record<string, HistoryPoint[]>): MergedPoint[] {
+  const dateMap: Record<string, MergedPoint> = {};
+
+  for (const [ticker, points] of Object.entries(histories)) {
+    for (const p of points) {
+      if (!dateMap[p.date]) dateMap[p.date] = { date: p.date };
+      dateMap[p.date][ticker] = p.close;
+    }
+  }
+
+  return Object.values(dateMap).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+export default function TickerComparison() {
+  const [selected, setSelected] = useState<string[]>(["AAPL", "MSFT"]);
+  const [histories, setHistories] = useState<Record<string, HistoryPoint[]>>({});
+  const [latestPrices, setLatestPrices] = useState<{ symbol: string; price: number }[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function toggleTicker(ticker: string) {
+    setSelected((prev) => {
+      if (prev.includes(ticker)) {
+        return prev.filter((t) => t !== ticker);
+      }
+      if (prev.length >= 3) return prev; // cap at 3
+      return [...prev, ticker];
+    });
+  }
+
+  useEffect(() => {
+    if (selected.length === 0) return;
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    async function fetchAll() {
+      try {
+        const historyResults = await Promise.all(
+          selected.map(async (ticker) => {
+            const res = await fetch(`/api/history/${ticker}`);
+            const json = await res.json();
+            if (json.error) throw new Error(json.error);
+            return [ticker, json] as [string, HistoryPoint[]];
+          })
+        );
+
+        const quoteResults = await Promise.all(
+          selected.map(async (ticker) => {
+            const res = await fetch(`/api/stock/${ticker}`);
+            const json = await res.json();
+            if (json.error) throw new Error(json.error);
+            return { symbol: ticker, price: parseFloat(json.price) };
+          })
+        );
+
+        if (!cancelled) {
+          setHistories(Object.fromEntries(historyResults));
+          setLatestPrices(quoteResults);
+        }
+      } catch (err: any) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchAll();
+    return () => {
+      cancelled = true;
+    };
+  }, [selected]);
+
+  const mergedData = mergeHistories(histories);
+
+  return (
+    <div className="mt-10">
+      <h2 className="text-lg font-semibold mb-3 text-gray-900">Compare Tickers</h2>
+
+      {/* Dropdown-style multi-select via checkboxes, capped at 3 */}
+      <div className="flex flex-wrap gap-3 mb-4">
+        {AVAILABLE_TICKERS.map((ticker) => (
+          <label
+            key={ticker}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-sm cursor-pointer select-none"
+            style={{
+              borderColor: selected.includes(ticker) ? COLORS[ticker] : undefined,
+              background: selected.includes(ticker) ? `${COLORS[ticker]}15` : undefined,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={selected.includes(ticker)}
+              onChange={() => toggleTicker(ticker)}
+              className="accent-[var(--accent)]"
+            />
+            {ticker}
+          </label>
+        ))}
+      </div>
+
+      {selected.length === 0 && (
+        <p className="text-sm text-gray-500">Select 1–3 tickers to compare.</p>
+      )}
+
+      {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
+
+      {loading && (
+        <div className="h-72 w-full rounded-xl shimmer mb-6" />
+      )}
+
+      {!loading && mergedData.length > 0 && (
+        <div className="card p-4 mb-6 h-80 w-full">
+          <p className="text-sm text-gray-500 mb-2">30-Day Price Comparison</p>
+          <ResponsiveContainer width="100%" height="90%">
+            <LineChart data={mergedData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="date" tick={{ fontSize: 10 }} minTickGap={20} />
+              <YAxis domain={["auto", "auto"]} tick={{ fontSize: 10 }} />
+              <Tooltip />
+              <Legend />
+              {selected.map((ticker) => (
+                <Line
+                  key={ticker}
+                  type="monotone"
+                  dataKey={ticker}
+                  stroke={COLORS[ticker]}
+                  dot={false}
+                  strokeWidth={2}
+                  connectNulls
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {!loading && latestPrices.length > 0 && (
+        <div className="card p-4 h-64 w-full">
+          <p className="text-sm text-gray-500 mb-2">Latest Price Comparison</p>
+          <ResponsiveContainer width="100%" height="90%">
+            <BarChart data={latestPrices}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="symbol" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 10 }} />
+              <Tooltip />
+              <Bar dataKey="price" radius={[6, 6, 0, 0]}>
+                {latestPrices.map((entry) => (
+                  <Cell key={entry.symbol} fill={COLORS[entry.symbol]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+}
