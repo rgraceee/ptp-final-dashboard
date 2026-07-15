@@ -6,7 +6,7 @@ type Record = {
   id: string;
   ticker: string;
   date: string;
-  price: string;
+  price: number;
   notes: string;
 };
 
@@ -40,7 +40,7 @@ export default function RecordsTable({ records, onEdit, onDelete }: RecordsTable
                 {r.ticker}
               </td>
               <td className="px-4 py-2 text-gray-900">{r.date}</td>
-              <td className="px-4 py-2 text-gray-900">${r.price}</td>
+              <td className="px-4 py-2 text-gray-900">${Number(r.price).toFixed(2)}</td>
               <td className="px-4 py-2 text-gray-500">{r.notes || "—"}</td>
               <td className="px-4 py-2">
                 <div className="flex items-center justify-end gap-3">
