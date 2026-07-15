@@ -5,69 +5,92 @@ import { supabase } from "@/lib/supabase";
 // GET ALL RECORDS
 export async function GET(){
 
-    const { data, error } = await supabase
-        .from("records")
-        .select("*")
-        .order("created_at", {
-            ascending:false
-        });
+  const { data, error } = await supabase
+    .from("records")
+    .select("*")
+    .order("created_at", {
+      ascending:false
+    });
 
 
-    if(error){
+  if(error){
 
-        return NextResponse.json(
-            {
-                error:error.message
-            },
-            {
-                status:500
-            }
-        );
+    return NextResponse.json(
+      {
+        error:error.message
+      },
+      {
+        status:500
+      }
+    );
 
-    }
+  }
 
 
-    return NextResponse.json(data);
+  return NextResponse.json(data);
 
 }
 
 
 
+
+
 // CREATE RECORD
-export async function POST(req:Request){
+export async function POST(
+req:Request
+){
 
-    const body = await req.json();
+  const body = await req.json();
 
 
-    const {data,error}=await supabase
-        .from("records")
-        .insert([
-            {
-                ticker:body.ticker,
-                date:body.date,
-                price:body.price,
-                notes:body.notes
-            }
-        ])
-        .select()
-        .single();
+  const {
+    ticker,
+    date,
+    price,
+    notes,
+    category
+  } = body;
 
 
 
-    if(error){
+  const { data, error } = await supabase
+    .from("records")
+    .insert([
+      {
+        ticker,
+        date,
+        price,
+        notes,
+        category
+      }
+    ])
+    .select();
 
-        return NextResponse.json(
-            {
-                error:error.message
-            },
-            {
-                status:500
-            }
-        );
 
+
+  if(error){
+
+    console.log(error);
+
+
+    return NextResponse.json(
+      {
+        error:error.message
+      },
+      {
+        status:500
+      }
+    );
+
+  }
+
+
+
+  return NextResponse.json(
+    data[0],
+    {
+      status:201
     }
-
-
-    return NextResponse.json(data);
+  );
 
 }
