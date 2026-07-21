@@ -10,40 +10,81 @@ const USE_MOCK_DATA = false;
 
 function mockQuote(symbol:string){
 
-const prices:any = {
+const stocks: Record<string, { price: number; changePercent: string; volume: string }> = {
 
-AAPL:189,
-TSLA:248,
-NVDA:135,
-GOOGL:178,
-MSFT:420,
-AMZN:225
+AAPL:{
+price:189.45,
+changePercent:"1.85%",
+volume:"50,000,000"
+},
+
+MSFT:{
+price:420.30,
+changePercent:"0.95%",
+volume:"35,000,000"
+},
+
+NVDA:{
+price:135.80,
+changePercent:"2.40%",
+volume:"45,000,000"
+},
+
+GOOGL:{
+price:178.25,
+changePercent:"1.20%",
+volume:"25,000,000"
+},
+
+AMZN:{
+price:225.10,
+changePercent:"0.75%",
+volume:"30,000,000"
+},
+
+TSLA:{
+price:248.50,
+changePercent:"-0.60%",
+volume:"60,000,000"
+}
 
 };
 
 
-const price = prices[symbol] ?? 150;
+const stock =
+stocks[symbol] ?? {
+price:150,
+changePercent:"1.00%",
+volume:"20,000,000"
+};
+
 
 
 return {
 
-symbol,
+  symbol,
 
-price:price.toFixed(2),
+  price: Number(stock.price.toFixed(2)),
 
-changePercent:"1.85%",
+  changePercent:
+  stock.changePercent,
 
-open:(price-2).toFixed(2),
+  open: Number((stock.price - 2).toFixed(2)),
 
-high:(price+5).toFixed(2),
+  high: Number((stock.price + 5).toFixed(2)),
 
-low:(price-5).toFixed(2),
+  low: Number((stock.price - 5).toFixed(2)),
 
-volume:"50,000,000"
+  volume:
+  stock.volume,
+
+  isMock:true
 
 };
 
 }
+
+
 
 
 
@@ -61,7 +102,9 @@ marketCap:
 (symbol.length * 1000000000000).toString(),
 
 description:
-`${symbol} company mock information`
+`${symbol} company mock information`,
+
+isMock:true
 
 };
 
@@ -69,11 +112,15 @@ description:
 
 
 
+
+
+
 function mockDailyHistory(){
 
-const points:any[]=[];
+const points: Array<{ date: string; close: number; isMock: boolean }> = [];
 
 let price=180;
+
 
 
 for(let i=29;i>=0;i--){
@@ -88,22 +135,34 @@ date.getDate()-i
 );
 
 
+
 points.push({
 
 date:
 date.toISOString().split("T")[0],
 
+
 close:
-parseFloat(price.toFixed(2))
+parseFloat(
+price.toFixed(2)
+),
+
+
+isMock:true
 
 });
 
+
 }
+
 
 
 return points;
 
 }
+
+
+
 
 
 
@@ -115,12 +174,15 @@ return points;
 export async function getQuote(symbol:string){
 
 
-if(USE_MOCK_DATA)
+if(USE_MOCK_DATA){
+
 return mockQuote(symbol);
 
+}
 
 
-try {
+
+try{
 
 
 const res = await fetch(
@@ -137,7 +199,8 @@ revalidate:60
 
 
 
-const data = await res.json();
+const data =
+await res.json();
 
 
 
@@ -148,49 +211,20 @@ data
 
 
 
-const q=data["Global Quote"];
+const q =
+data["Global Quote"];
 
 
 
-if(!q || !q["05. price"]){
-
-return mockQuote(symbol);
-
-}
 
 
+if(
+!q ||
+!q["05. price"]
+){
 
-return {
-
-symbol:q["01. symbol"],
-
-price:
-parseFloat(q["05. price"]).toFixed(2),
-
-changePercent:
-q["10. change percent"],
-
-open:
-parseFloat(q["02. open"]).toFixed(2),
-
-high:
-parseFloat(q["03. high"]).toFixed(2),
-
-low:
-parseFloat(q["04. low"]).toFixed(2),
-
-volume:
-Number(q["06. volume"]).toLocaleString()
-
-};
-
-
-
-}catch(error){
-
-console.error(
-"Quote error:",
-error
+console.warn(
+"Alpha Vantage unavailable. Using fallback."
 );
 
 
@@ -199,7 +233,71 @@ return mockQuote(symbol);
 }
 
 
+
+
+
+return {
+
+  symbol:
+  q["01. symbol"],
+
+  price:
+  parseFloat(
+    q["05. price"]
+  ),
+
+  changePercent:
+  q["10. change percent"],
+
+  open:
+  parseFloat(
+    q["02. open"]
+  ),
+
+  high:
+  parseFloat(
+    q["03. high"]
+  ),
+
+  low:
+  parseFloat(
+    q["04. low"]
+  ),
+
+  volume:
+  Number(
+    q["06. volume"]
+  ).toLocaleString(),
+
+  isMock:false
+
+};
+
+
+
 }
+catch(error){
+
+
+console.error(
+"Quote error:",
+error
+);
+
+
+
+return mockQuote(symbol);
+
+
+}
+
+
+
+}
+
+
+
+
 
 
 
@@ -208,12 +306,14 @@ return mockQuote(symbol);
 // ---------- COMPANY OVERVIEW ----------
 
 
-
 export async function getOverview(symbol:string){
 
 
-if(USE_MOCK_DATA)
+if(USE_MOCK_DATA){
+
 return mockOverview(symbol);
+
+}
 
 
 
@@ -234,7 +334,8 @@ revalidate:21600
 
 
 
-const data=await res.json();
+const data =
+await res.json();
 
 
 
@@ -245,11 +346,15 @@ data
 
 
 
-if(!data.Name){
+
+if(
+!data.Name
+){
 
 return mockOverview(symbol);
 
 }
+
 
 
 
@@ -263,19 +368,23 @@ industry:data.Industry,
 
 marketCap:data.MarketCapitalization,
 
-description:data.Description
+description:data.Description,
+
+isMock:false
 
 };
 
 
 
-}catch(error){
+}
+catch(error){
 
 
 console.error(
 "Overview error:",
 error
 );
+
 
 
 return mockOverview(symbol);
@@ -291,15 +400,21 @@ return mockOverview(symbol);
 
 
 
-// ---------- DAILY HISTORY ----------
 
+
+
+
+// ---------- DAILY HISTORY ----------
 
 
 export async function getDailyHistory(symbol:string){
 
 
-if(USE_MOCK_DATA)
+if(USE_MOCK_DATA){
+
 return mockDailyHistory();
+
+}
 
 
 
@@ -320,7 +435,8 @@ revalidate:21600
 
 
 
-const data=await res.json();
+const data =
+await res.json();
 
 
 
@@ -331,20 +447,24 @@ data
 
 
 
-const series=data["Time Series (Daily)"];
+const series =
+data["Time Series (Daily)"];
+
+
 
 
 
 if(!series){
 
 console.warn(
-"No history from Alpha Vantage, using mock"
+"No history. Using fallback."
 );
 
 
 return mockDailyHistory();
 
 }
+
 
 
 
@@ -355,14 +475,26 @@ return Object.entries(series)
 
 .map(
 
-([date,values]:[string,any])=>({
+([date,values])=>{
 
-date,
+  const record = values as Record<string, unknown>;
 
-close:
-parseFloat(values["4. close"])
+  return {
 
-})
+    date,
+
+    close:
+    parseFloat(
+      record["4. close"] as string
+    ),
+
+
+    isMock:false
+
+
+  };
+
+}
 
 )
 
@@ -370,13 +502,15 @@ parseFloat(values["4. close"])
 
 
 
-}catch(error){
+}
+catch(error){
 
 
 console.error(
 "History error:",
 error
 );
+
 
 
 return mockDailyHistory();
@@ -392,14 +526,21 @@ return mockDailyHistory();
 
 
 
-// ---------- TOP MOVERS ----------
 
+
+
+
+// ---------- TOP MOVERS ----------
 
 
 export async function getTopMovers(){
 
 
-const res=await fetch(
+try{
+
+
+const res =
+await fetch(
 
 `${BASE}?function=TOP_GAINERS_LOSERS&apikey=${KEY}`,
 
@@ -413,7 +554,8 @@ revalidate:300
 
 
 
-const data=await res.json();
+const data =
+await res.json();
 
 
 
@@ -422,10 +564,27 @@ return {
 gainers:
 (data.top_gainers ?? []).slice(0,5),
 
+
 losers:
 (data.top_losers ?? []).slice(0,5)
 
 };
+
+
+
+}
+catch{
+
+return {
+
+gainers:[],
+
+losers:[]
+
+};
+
+}
+
 
 
 }
@@ -435,14 +594,20 @@ losers:
 
 
 
-// ---------- CRYPTO ----------
 
+
+
+// ---------- CRYPTO ----------
 
 
 export async function getCryptoPrice(symbol:string){
 
 
-const res=await fetch(
+try{
+
+
+const res =
+await fetch(
 
 `${BASE}?function=CURRENCY_EXCHANGE_RATE&from_currency=${symbol}&to_currency=USD&apikey=${KEY}`,
 
@@ -456,31 +621,47 @@ revalidate:60
 
 
 
-const data=await res.json();
+const data =
+await res.json();
 
 
-const rate=
+
+const rate =
 data["Realtime Currency Exchange Rate"];
 
 
 
-if(!rate)
+
+if(!rate){
+
 throw new Error(
 "No crypto data"
 );
+
+}
+
 
 
 
 return {
 
-symbol,
+  symbol,
 
-price:
-parseFloat(
-rate["5. Exchange Rate"]
-).toFixed(2)
+  price:
+  parseFloat(
+    rate["5. Exchange Rate"]
+  )
 
 };
+
+
+
+}
+catch(error){
+
+throw error;
+
+}
 
 
 }
@@ -490,14 +671,20 @@ rate["5. Exchange Rate"]
 
 
 
-// ---------- INTRADAY ----------
 
+
+
+// ---------- INTRADAY ----------
 
 
 export async function getIntraday(symbol:string){
 
 
-const res=await fetch(
+try{
+
+
+const res =
+await fetch(
 
 `${BASE}?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${KEY}`,
 
@@ -511,11 +698,12 @@ revalidate:60
 
 
 
-const data=await res.json();
+const data =
+await res.json();
 
 
 
-const series=
+const series =
 data["Time Series (5min)"];
 
 
@@ -525,25 +713,49 @@ return [];
 
 
 
+
+
 return Object.entries(series)
 
 .slice(0,20)
 
 .map(
 
-([time,values]:[string,any])=>({
+([time,values])=>{
 
-time:
-time.split(" ")[1],
+  const record = values as Record<string, unknown>;
 
-price:
-parseFloat(values["4. close"])
+  return {
 
-})
+
+    time:
+    time.split(" ")[1],
+
+
+
+    price:
+    parseFloat(
+      record["4. close"] as string
+    )
+
+
+  };
+
+}
 
 )
 
 .reverse();
+
+
+
+}
+catch{
+
+return [];
+
+}
+
 
 
 }

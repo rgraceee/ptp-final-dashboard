@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDailyHistory } from "@/lib/alphaVantage";
+import { getOverview } from "@/lib/alphaVantage";
 
 export async function GET(
   req: Request,
@@ -7,8 +7,8 @@ export async function GET(
 ) {
   const { ticker } = await params;
   try {
-    const data = await getDailyHistory(ticker.toUpperCase());
-    return NextResponse.json(data);
+    const result = await getOverview(ticker.toUpperCase());
+    return NextResponse.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });

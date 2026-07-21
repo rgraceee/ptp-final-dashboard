@@ -1,640 +1,335 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useRecords, RecordType } from "@/lib/RecordsContext";
+import { useToast } from "@/components/Toast";
+import { RefreshCw } from "lucide-react";
 import RecordsTable from "@/components/RecordsTable";
+import RecordsFilters from "@/components/RecordsFilters";
+import RecordsStats from "@/components/RecordsStats";
+import RecordsPriceChart from "@/components/RecordsPriceChart";
 
-type RecordType = {
-  id: string;
-  ticker: string;
-  date: string;
-  price: number;
-  notes: string;
-  category: string;
-};
-
+const TODAY = new Date().toISOString().split("T")[0];
 
 export default function RecordForm() {
-
-
-const [records,setRecords] = useState<RecordType[]>([]);
-
-
-const [ticker,setTicker] = useState("");
-const [date,setDate] = useState("");
-const [price,setPrice] = useState("");
-const [notes,setNotes] = useState("");
-const [category,setCategory] = useState("Buy");
-
-
-const [categoryFilter,setCategoryFilter] = useState("All");
-const [startDate,setStartDate] = useState("");
-const [endDate,setEndDate] = useState("");
-
-
-const [editingId,setEditingId] = useState<string|null>(null);
-
-
-
-async function fetchRecords(){
-
-try{
-
-const res = await fetch("/api/records");
-
-const data = await res.json();
-
-setRecords(data);
-
-}
-
-catch(err){
-
-console.error(
-"Failed loading records",
-err
-);
-
-}
-
-}
-
-
-
-useEffect(()=>{
-
-fetchRecords();
-
-},[]);
-
-
-
-
-
-// FILTERING
-
-const filteredRecords = records.filter((record)=>{
-
-
-const categoryMatch =
-categoryFilter === "All" ||
-record.category === categoryFilter;
-
-
-const startMatch =
-!startDate ||
-record.date >= startDate;
-
-
-const endMatch =
-!endDate ||
-record.date <= endDate;
-
-
-
-return (
-categoryMatch &&
-startMatch &&
-endMatch
-);
-
-
-});
-
-
-
-// ANALYTICS
-
-const totalValue = filteredRecords.reduce(
-(sum,record)=>
-sum + Number(record.price),
-0
-);
-
-
-const averagePrice =
-filteredRecords.length
-?
-totalValue / filteredRecords.length
-:
-0;
-
-
-
-
-
-
-
-async function handleSubmit(
-e:React.FormEvent
-){
-
-e.preventDefault();
-
-
-
-const payload = {
-
-ticker:ticker.toUpperCase(),
-
-date,
-
-price:Number(price),
-
-notes,
-
-category
-
-};
-
-
-
-
-
-try{
-
-
-if(editingId){
-
-
-await fetch(
-`/api/records/${editingId}`,
-{
-
-method:"PUT",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify(payload)
-
-}
-
-);
-
-
-}
-else{
-
-
-await fetch(
-"/api/records",
-{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify(payload)
-
-}
-
-);
-
-
-}
-
-
-
-reset();
-
-fetchRecords();
-
-
-}
-
-catch(err){
-
-console.error(err);
-
-}
-
-
-}
-
-
-
-
-
-
-
-
-function reset(){
-
-setTicker("");
-
-setDate("");
-
-setPrice("");
-
-setNotes("");
-
-setCategory("Buy");
-
-setEditingId(null);
-
-}
-
-
-
-
-
-
-
-function handleEdit(record:RecordType){
-
-
-setEditingId(record.id);
-
-setTicker(record.ticker);
-
-setDate(record.date);
-
-setPrice(
-String(record.price)
-);
-
-setNotes(record.notes);
-
-setCategory(record.category);
-
-
-}
-
-
-
-
-
-
-
-
-async function handleDelete(id:string){
-
-
-await fetch(
-`/api/records/${id}`,
-{
-method:"DELETE"
-}
-);
-
-
-fetchRecords();
-
-
-}
-
-
-
-
-
-
-
-return (
-
-<div className="mt-10">
-
-
-<h2 className="text-lg font-semibold mb-3">
-
-{
-editingId
-?
-"Edit Record"
-:
-"Add Record"
-}
-
-</h2>
-
-
-
-
-
-<form
-onSubmit={handleSubmit}
-className="card p-5 max-w-md space-y-4"
->
-
-
-
-<input
-
-value={ticker}
-
-onChange={(e)=>setTicker(e.target.value)}
-
-placeholder="Ticker e.g. AAPL"
-
-className="input"
-
-/>
-
-
-
-
-<input
-
-type="date"
-
-value={date}
-
-onChange={(e)=>setDate(e.target.value)}
-
-className="input"
-
-/>
-
-
-
-
-
-<input
-
-value={price}
-
-onChange={(e)=>setPrice(e.target.value)}
-
-placeholder="Price"
-
-className="input"
-
-/>
-
-
-
-
-
-<select
-
-value={category}
-
-onChange={(e)=>setCategory(e.target.value)}
-
-className="input"
-
->
-
-
-<option value="Buy">
-Buy
-</option>
-
-
-<option value="Sell">
-Sell
-</option>
-
-
-</select>
-
-
-
-
-
-<textarea
-
-value={notes}
-
-onChange={(e)=>setNotes(e.target.value)}
-
-placeholder="Notes"
-
-className="input"
-
-/>
-
-
-
-
-
-<button
-
-className="px-4 py-2 rounded-lg text-white"
-
-style={{
-background:"var(--accent)"
-}}
-
->
-
-{
-editingId
-?
-"Save Changes"
-:
-"Add Record"
-}
-
-
-</button>
-
-
-
-
-
-{
-editingId &&
-
-<button
-
-type="button"
-
-onClick={reset}
-
-className="ml-3"
-
->
-
-Cancel
-
-</button>
-
-}
-
-
-
-</form>
-
-
-
-
-
-
-
-
-
-<div className="mt-8">
-
-
-
-<div className="card p-4 mb-5">
-
-
-<h3 className="font-semibold mb-3">
-
-Analytics Filters
-
-</h3>
-
-
-
-
-<div className="flex flex-wrap gap-3">
-
-
-
-<input
-
-type="date"
-
-value={startDate}
-
-onChange={(e)=>setStartDate(e.target.value)}
-
-className="input"
-
-/>
-
-
-
-
-
-<input
-
-type="date"
-
-value={endDate}
-
-onChange={(e)=>setEndDate(e.target.value)}
-
-className="input"
-
-/>
-
-
-
-
-
-<select
-
-value={categoryFilter}
-
-onChange={(e)=>setCategoryFilter(e.target.value)}
-
-className="input"
-
->
-
-
-<option value="All">
-All Categories
-</option>
-
-
-<option value="Buy">
-Buy
-</option>
-
-
-<option value="Sell">
-Sell
-</option>
-
-
-</select>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div className="grid grid-cols-3 gap-4 mb-5">
-
-
-<div className="card p-4">
-
-<p className="text-sm text-gray-500">
-Filtered Records
-</p>
-
-<p className="text-xl font-bold">
-{filteredRecords.length}
-</p>
-
-</div>
-
-
-
-
-<div className="card p-4">
-
-<p className="text-sm text-gray-500">
-Total Value
-</p>
-
-<p className="text-xl font-bold">
-${totalValue.toFixed(2)}
-</p>
-
-</div>
-
-
-
-
-
-<div className="card p-4">
-
-<p className="text-sm text-gray-500">
-Average Price
-</p>
-
-<p className="text-xl font-bold">
-${averagePrice.toFixed(2)}
-</p>
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-<RecordsTable
-
-records={filteredRecords}
-
-onEdit={handleEdit}
-
-onDelete={handleDelete}
-
-/>
-
-
-
-</div>
-
-
-</div>
-
-
-);
-
-
+  const {
+    records,
+    loading,
+    statsLoading,
+    fetchRecords,
+    fetchStats,
+    addRecord,
+    updateRecord,
+    deleteRecord,
+  } = useRecords();
+  const { showToast } = useToast();
+
+  const [ticker, setTicker] = useState("");
+  const [date, setDate] = useState(TODAY);
+  const [price, setPrice] = useState("");
+  const [notes, setNotes] = useState("");
+  const [category, setCategory] = useState("Buy");
+
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [tickerFilter, setTickerFilter] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{
+    ticker?: string;
+    date?: string;
+    price?: string;
+  }>({});
+
+  useEffect(() => {
+    fetchRecords();
+    fetchStats();
+  }, [fetchRecords, fetchStats]);
+
+  const filteredRecords = records.filter((record) => {
+    const categoryMatch =
+      categoryFilter === "All" || record.category === categoryFilter;
+    const tickerMatch = !tickerFilter || record.ticker.includes(tickerFilter);
+    const startMatch = !startDate || record.date >= startDate;
+    const endMatch = !endDate || record.date <= endDate;
+    return categoryMatch && tickerMatch && startMatch && endMatch;
+  });
+
+  const hasActiveFilters =
+    categoryFilter !== "All" ||
+    !!tickerFilter ||
+    !!startDate ||
+    !!endDate;
+
+  const chartData = [...filteredRecords]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((r) => ({
+      date: r.date,
+      price: Number(r.price),
+    }));
+
+  const filteredStats = {
+    totalRecords: filteredRecords.length,
+    totalValue: filteredRecords.reduce((sum, r) => sum + Number(r.price), 0),
+    averagePrice:
+      filteredRecords.length > 0
+        ? filteredRecords.reduce((sum, r) => sum + Number(r.price), 0) /
+          filteredRecords.length
+        : 0,
+    latestEntry: filteredRecords[0] ?? null,
+  };
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setFieldErrors({});
+
+    const trimmedTicker = ticker.trim().toUpperCase();
+    const trimmedDate = date.trim();
+    const numericPrice = Number(price);
+
+    const errors: { ticker?: string; date?: string; price?: string } = {};
+
+    if (!trimmedTicker || !/^[A-Z]{1,5}$/.test(trimmedTicker)) {
+      errors.ticker = "Ticker must be 1-5 uppercase letters";
+    }
+
+    if (!trimmedDate || isNaN(Date.parse(trimmedDate))) {
+      errors.date = "Please provide a valid date";
+    } else if (new Date(trimmedDate) > new Date()) {
+      errors.date = "Date cannot be in the future";
+    }
+
+    if (!numericPrice || numericPrice <= 0 || numericPrice >= 1_000_000) {
+      errors.price = "Price must be between 0 and 1,000,000";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    const payload = {
+      ticker: trimmedTicker,
+      date: trimmedDate,
+      price: numericPrice,
+      notes,
+      category,
+    };
+
+    try {
+      if (editingId) {
+        await updateRecord(editingId, payload);
+        showToast("success", "Record updated", `${trimmedTicker} updated successfully`);
+      } else {
+        await addRecord(payload);
+        showToast("success", "Record added", `${trimmedTicker} added to your portfolio`);
+      }
+      reset();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save record";
+      showToast("error", "Save failed", message);
+    }
+  }
+
+  function reset() {
+    setTicker("");
+    setDate(TODAY);
+    setPrice("");
+    setNotes("");
+    setCategory("Buy");
+    setEditingId(null);
+    setFieldErrors({});
+  }
+
+  function handleEdit(record: RecordType) {
+    setEditingId(record.id);
+    setTicker(record.ticker);
+    setDate(record.date);
+    setPrice(String(record.price));
+    setNotes(record.notes);
+    setCategory(record.category);
+  }
+
+  async function handleDelete(id: string) {
+    const record = records.find((r) => r.id === id);
+    if (!record) return;
+
+    const confirmed = window.confirm(
+      `Delete ${record.ticker} record from ${record.date}? This action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await deleteRecord(id);
+      showToast("success", "Record deleted", `${record.ticker} record removed`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to delete record";
+      showToast("error", "Delete failed", message);
+    }
+  }
+
+  const inputBase =
+    "h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[rgba(194,67,111,0.15)] hover:border-gray-300";
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+          {editingId ? "Edit Record" : "Add Record"}
+        </h2>
+        <button
+          onClick={() => {
+            fetchRecords();
+            fetchStats();
+          }}
+          className="btn btn-ghost text-sm"
+        >
+          <RefreshCw size={16} className={statsLoading ? "animate-spin" : ""} />
+          Refresh records
+        </button>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        className="card card-accent p-4"
+      >
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex-1 min-w-[140px]">
+            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">
+              Ticker
+            </label>
+            <input
+              value={ticker}
+              onChange={(e) => setTicker(e.target.value)}
+              placeholder="AAPL"
+              className={`${inputBase} ${fieldErrors.ticker ? "input-error" : ""}`}
+              required
+              maxLength={5}
+            />
+            {fieldErrors.ticker && (
+              <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.ticker}</p>
+            )}
+          </div>
+
+          <div className="w-[160px]">
+            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">
+              Date
+            </label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={`${inputBase} ${fieldErrors.date ? "input-error" : ""}`}
+              required
+              max={TODAY}
+            />
+            {fieldErrors.date && (
+              <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.date}</p>
+            )}
+          </div>
+
+          <div className="w-[140px]">
+            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">
+              Price
+            </label>
+            <input
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="0.00"
+              className={`${inputBase} ${fieldErrors.price ? "input-error" : ""}`}
+              required
+              min="0.01"
+              step="0.01"
+              type="number"
+            />
+            {fieldErrors.price && (
+              <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.price}</p>
+            )}
+          </div>
+
+          <div className="w-[130px]">
+            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">
+              Category
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className={inputBase}
+            >
+              <option value="Buy">Buy</option>
+              <option value="Sell">Sell</option>
+            </select>
+          </div>
+
+          <div className="flex-1 min-w-[160px]">
+            <label className="block text-xs font-medium text-gray-500 mb-1 ml-1">
+              Notes
+            </label>
+            <input
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Optional notes"
+              className={inputBase}
+            />
+          </div>
+
+          <div className="flex-shrink-0 flex items-center gap-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary h-10 px-5"
+            >
+              {loading
+                ? editingId
+                  ? "Saving..."
+                  : "Adding..."
+                : editingId
+                  ? "Save"
+                  : "Add Record"}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={reset}
+                className="btn btn-ghost text-xs"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </div>
+      </form>
+
+      <RecordsStats stats={filteredStats} loading={statsLoading} />
+
+      <RecordsFilters
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        tickerFilter={tickerFilter}
+        setTickerFilter={setTickerFilter}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        onClear={() => {
+          setCategoryFilter("All");
+          setTickerFilter("");
+          setStartDate("");
+          setEndDate("");
+        }}
+        hasActiveFilters={hasActiveFilters}
+      />
+
+      <RecordsPriceChart data={chartData} loading={statsLoading} />
+
+      <RecordsTable
+        records={filteredRecords}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        hasActiveFilters={hasActiveFilters}
+        loading={loading}
+      />
+    </div>
+  );
 }

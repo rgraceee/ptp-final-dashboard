@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getQuote } from "@/lib/alphaVantage";
-import { supabase } from "@/lib/supabase";
-
+import { createServerSupabaseClient } from "@/lib/supabase-server";
 
 export async function GET(
   req: Request,
@@ -12,8 +11,8 @@ export async function GET(
 
   const symbol = ticker.toUpperCase();
 
+  const supabase = createServerSupabaseClient();
 
-  // Check if ticker exists in Supabase
   const { data, error } = await supabase
     .from("tickers")
     .select("symbol")
@@ -66,18 +65,16 @@ export async function GET(
     return NextResponse.json(result);
 
 
-  } catch (err:any) {
-
-
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Internal server error";
     return NextResponse.json(
       {
-        error: err.message
+        error: message
       },
       {
         status:500
       }
     );
-
   }
 
 }

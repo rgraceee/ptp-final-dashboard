@@ -21,7 +21,8 @@ export default function SearchBar({
 
     try {
       const response = await fetch(
-        `/api/ticker?symbol=${ticker}`
+        `/api/ticker?symbol=${ticker}`,
+        { credentials: "include" }
       );
 
       if (!response.ok) {
@@ -31,64 +32,33 @@ export default function SearchBar({
 
       onSearch(ticker);
       setValue("");
-
-    } catch (error) {
+    } catch {
       setError("Something went wrong");
     }
   }
 
-
   return (
-    <div>
-
-      <form
-        onSubmit={handleSubmit}
-        className="flex gap-2"
-      >
-
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="flex-1 max-w-md">
         <input
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="Search ticker"
-          className="
-          border border-gray-200
-          rounded-lg
-          px-3
-          py-2.5
-          text-sm
-          w-64
-          outline-none
-          text-gray-900
-          "
+          placeholder="Search ticker..."
+          className="input pr-10"
         />
-
-
-        <button
-          type="submit"
-          className="
-          px-4
-          py-2.5
-          rounded-lg
-          text-sm
-          text-white
-          hover:scale-105
-          "
-          style={{
-            background:"var(--accent)"
-          }}
-        >
-          Search
-        </button>
-
-      </form>
-
+      </div>
+      <button
+        type="submit"
+        className="btn btn-primary px-5"
+      >
+        Search
+      </button>
 
       {error && (
-        <p className="text-red-500 text-sm mt-2">
+        <p className="text-red-500 text-sm mt-2 w-full max-w-md">
           {error}
         </p>
       )}
-
-    </div>
+    </form>
   );
 }

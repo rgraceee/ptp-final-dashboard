@@ -1,371 +1,289 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
+
+import { createClient } from "@/lib/supabase";
+
+import { QuoteType, OverviewType, HistoryPoint } from "@/lib/types";
+
+import TopBar from "@/components/TopBar";
 import StatCard from "@/components/StatCard";
-import SearchBar from "@/components/SearchBar";
-import TickerDirectory from "@/components/TickerDirectory";
 import PriceChart from "@/components/PriceChart";
-import TickerComparison from "@/components/TickerComparison";
 import RecordForm from "@/components/RecordForm";
+import CategoryPieChart from "@/components/CategoryPieChart";
+import ActivityFeed from "@/components/ActivityFeed";
+import TickerComparison from "@/components/TickerComparison";
 
-import {
-  getQuote,
-  getOverview,
-  getDailyHistory,
-} from "@/lib/alphaVantage";
+import { formatMarketCap } from "@/lib/utils";
+import { TrendingUp, BarChart3, Wallet, ArrowUpRight, ArrowDownRight } from "lucide-react";
 
-
-function formatMarketCap(raw?: string) {
-  const num = Number(raw);
-
-  if (!num) return "N/A";
-
-  if (num >= 1e12) return `$${(num / 1e12).toFixed(2)}T`;
-  if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
-  if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
-
-  return `$${num.toLocaleString()}`;
+function SkeletonStatCard() {
+  return (
+    <div className="rounded-xl border border-gray-200/80 bg-white shadow-sm p-4 w-full h-full">
+      <div className="h-3 w-20 rounded shimmer mb-3" />
+      <div className="h-7 w-28 rounded shimmer mb-3" />
+      <div className="h-3 w-16 rounded shimmer" />
+    </div>
+  );
 }
 
+function SkeletonChart() {
+  return (
+    <div className="card p-6 w-full h-full min-h-[360px]">
+      <div className="h-5 w-40 rounded shimmer mb-2" />
+      <div className="h-3 w-56 rounded shimmer mb-6" />
+      <div className="h-64 w-full shimmer rounded" />
+    </div>
+  );
+}
 
+function SkeletonTickerComparison() {
+  return (
+    <div className="mt-10">
+      <div className="h-6 w-48 rounded shimmer mb-4" />
+      <div className="flex flex-wrap gap-2 mb-4">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="h-9 w-16 rounded-full shimmer" />
+        ))}
+      </div>
+      <div className="card p-5 h-80 mb-6">
+        <div className="h-5 w-56 rounded shimmer mb-3" />
+        <div className="h-64 w-full shimmer rounded" />
+      </div>
+      <div className="card p-5 h-72">
+        <div className="h-5 w-56 rounded shimmer mb-3" />
+        <div className="h-56 w-full shimmer rounded" />
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
+  const router = useRouter();
 
   const [ticker, setTicker] = useState("AAPL");
+  const [quote, setQuote] = useState<QuoteType | null>(null);
+  const [overview, setOverview] = useState<OverviewType | null>(null);
+  const [history, setHistory] = useState<HistoryPoint[]>([]);
 
-  const [quote, setQuote] = useState<any>(null);
-  const [overview, setOverview] = useState<any>(null);
-  const [history, setHistory] = useState<any[]>([]);
-
-  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
+  const [userEmail, setUserEmail] = useState("");
 
+  useEffect(() => {
+    async function checkUser() {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getSession();
+
+      if (!data.session) {
+        router.push("/login");
+        return;
+      }
+
+      setUserEmail(data.session.user.email || "");
+    }
+
+    checkUser();
+  }, [router]);
 
   async function validateTicker(symbol: string) {
-
-    const response = await fetch(
-      `/api/ticker?symbol=${symbol}`
-    );
-
+    const response = await fetch(`/api/ticker?symbol=${symbol}`, {
+      credentials: "include",
+    });
 
     if (!response.ok) {
       throw new Error("Ticker does not exist");
     }
 
-
     return true;
-
   }
 
-
-
-
-
-  async function fetchData(selectedTicker = ticker) {
-
+  const fetchData = useCallback(async (selectedTicker?: string) => {
     try {
-
-      setLoading(true);
+      setRefreshing(true);
       setError("");
 
+      const symbol = selectedTicker || ticker;
 
-      await validateTicker(selectedTicker);
+      await validateTicker(symbol);
 
-
-
-      const [
-        quoteData,
-        overviewData,
-        historyData
-      ] = await Promise.all([
-
-        getQuote(selectedTicker),
-        getOverview(selectedTicker),
-        getDailyHistory(selectedTicker)
-
+      const [quoteRes, overviewRes, historyRes] = await Promise.all([
+        fetch(`/api/quote/${symbol}`, { credentials: "include" }),
+        fetch(`/api/overview/${symbol}`, { credentials: "include" }),
+        fetch(`/api/history/${symbol}`, { credentials: "include" }),
       ]);
 
+      if (!quoteRes.ok || !overviewRes.ok || !historyRes.ok) {
+        throw new Error("Failed to load market data");
+      }
 
+      const [quoteData, overviewData, historyData] = await Promise.all([
+        quoteRes.json(),
+        overviewRes.json(),
+        historyRes.json(),
+      ]);
 
       setQuote(quoteData);
       setOverview(overviewData);
       setHistory(historyData);
-
-
-
-    } catch(error:any) {
-
-
-      console.error(
-        "Dashboard error:",
-        error
-      );
-
-
-      setError(
-        error.message || "Failed to load data"
-      );
-
-
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed loading dashboard";
+      setError(errorMessage);
       setQuote(null);
       setOverview(null);
       setHistory([]);
-
-
-
     } finally {
-
-
-      setLoading(false);
-
-
+      setRefreshing(false);
     }
+  }, [ticker]);
 
-  }
+  const initialized = useRef(false);
 
-
-
-
-
-  useEffect(()=>{
-
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
     fetchData();
+  }, [fetchData]);
 
-  },[]);
-
-
-
-
-
-  function handleSearch(newTicker:string){
-
-    setTicker(newTicker);
-
-    fetchData(newTicker);
-
+  async function handleRefresh() {
+    await fetchData(ticker);
   }
 
-
-
-
-
-
-
-return (
-
-<div className="p-6">
-
-
-{/* HEADER */}
-
-<div className="flex items-center justify-between mb-4">
-
-
-<h1 className="text-xl font-bold text-gray-900">
-Dashboard
-</h1>
-
-
-
-<button
-onClick={()=>fetchData()}
-disabled={loading}
-className="
-px-4 py-2
-rounded-lg
-text-sm
-font-medium
-text-white
-hover:scale-105
-disabled:opacity-50
-"
-style={{
-background:"var(--accent)"
-}}
->
-
-{loading ? "Refreshing..." : "Refresh Data"}
-
-</button>
-
-
-</div>
-
-
-
-
-
-{/* SEARCH */}
-
-<div className="mb-4">
-
-<SearchBar
-onSearch={handleSearch}
-/>
-
-</div>
-
-
-
-
-
-{/* ERROR */}
-
-{
-error && (
-
-<p className="
-text-red-500
-text-sm
-mb-4
-">
-
-{error}
-
-</p>
-
-)
-
-}
-
-
-
-
-
-{/* CONTENT */}
-
-{
-loading && !quote ? (
-
-<p className="text-gray-500">
-Loading dashboard...
-</p>
-
-
-) : (
-
-
-<>
-
-
-{/* STAT CARDS */}
-
-<div className="flex flex-wrap gap-4">
-
-
-<StatCard
-label={`${quote?.symbol} Price`}
-value={`$${quote?.price}`}
-change={quote?.changePercent}
-/>
-
-
-
-<StatCard
-label="Open Price"
-value={`$${quote?.open}`}
-/>
-
-
-
-<StatCard
-label="Volume"
-value={quote?.volume}
-/>
-
-
-
-<StatCard
-label="Market Cap"
-value={formatMarketCap(
-overview?.marketCap
-)}
-/>
-
-
-</div>
-
-
-
-
-
-
-{/* PRICE CHART */}
-
-{
-history.length > 0 && (
-
-<PriceChart
-data={history}
-/>
-
-)
-
-}
-
-
-
-
-
-{/* TICKER COMPARISON */}
-
-<TickerComparison />
-
-
-
-
-
-{/* TICKER DIRECTORY */}
-
-<TickerDirectory
-
-onSelect={(symbol)=>{
-
-setTicker(symbol);
-
-fetchData(symbol);
-
-}}
-
-/>
-
-
-
-
-
-
-{/* SUPABASE RECORDS */}
-
-<div className="mt-12">
-
-
-<h2 className="text-xl font-bold text-gray-900 mb-4">
-My Records
-</h2>
-
-
-
-<RecordForm />
-
-
-</div>
-
-
-
-
-
-</>
-
-
-)
-
-}
-
-
-</div>
-
-);
-
-
+  function handleSearch(symbol: string) {
+    const clean = symbol.toUpperCase();
+    setTicker(clean);
+    fetchData(clean);
+  }
+
+  const topChartData = history.slice(-14).map((h) => ({
+    date: h.date,
+    close: h.close,
+  }));
+
+  return (
+    <div className="min-h-screen gradient-soft">
+      <TopBar
+        userEmail={userEmail}
+        onRefresh={handleRefresh}
+        refreshing={refreshing}
+        onSearch={handleSearch}
+      />
+
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        {error && (
+          <div className="card border-red-100 bg-red-50/60 p-4 mb-6 flex items-center gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 text-sm font-bold">
+              !
+            </div>
+            <p className="text-red-700 text-sm font-medium">{error}</p>
+          </div>
+        )}
+
+        {!quote ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+              <div className="lg:col-span-1 flex flex-col gap-4">
+                <SkeletonStatCard />
+                <SkeletonStatCard />
+                <SkeletonStatCard />
+              </div>
+              <div className="lg:col-span-2">
+                <SkeletonChart />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <SkeletonStatCard key={i} />
+              ))}
+            </div>
+            <SkeletonTickerComparison />
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+              <div className="lg:col-span-1 flex flex-col gap-4 h-full">
+                <div className="flex-1 min-h-0">
+                  <StatCard
+                    label={`${quote.symbol} Price`}
+                    value={`$${quote.price.toFixed(2)}`}
+                    change={quote.changePercent}
+                    icon={<TrendingUp size={18} />}
+                    gradient="price"
+                    highlight
+                  />
+                </div>
+                <div className="flex-1 min-h-0">
+                  <StatCard
+                    label="Open Price"
+                    value={`$${quote.open.toFixed(2)}`}
+                    icon={<BarChart3 size={18} />}
+                    gradient="open"
+                  />
+                </div>
+                <div className="flex-1 min-h-0">
+                  <StatCard
+                    label="Risk Score"
+                    value={(() => {
+                      const dayRange = ((quote.high - quote.low) / quote.price) * 100;
+                      const change = parseFloat(quote.changePercent);
+                      if (dayRange < 2 && Math.abs(change) < 1.5) return "Low";
+                      if (dayRange > 5 || Math.abs(change) > 3) return "High";
+                      return "Medium";
+                    })()}
+                    icon={<BarChart3 size={18} />}
+                    gradient="cap"
+                  />
+                </div>
+              </div>
+              <div className="lg:col-span-2 h-full">
+                {history.length > 0 && <PriceChart data={topChartData} />}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard
+                label="Volume"
+                value={quote.volume}
+                icon={<Wallet size={18} />}
+                gradient="volume"
+              />
+              <StatCard
+                label="Market Cap"
+                value={formatMarketCap(overview?.marketCap)}
+                icon={<Wallet size={18} />}
+                gradient="cap"
+              />
+              <StatCard
+                label="Day High"
+                value={`$${quote.high.toFixed(2)}`}
+                icon={<ArrowUpRight size={18} />}
+                gradient="high"
+              />
+              <StatCard
+                label="Day Low"
+                value={`$${quote.low.toFixed(2)}`}
+                icon={<ArrowDownRight size={18} />}
+                gradient="low"
+              />
+            </div>
+
+            <TickerComparison />
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <div className="xl:col-span-2">
+                <RecordForm />
+              </div>
+              <div className="space-y-6">
+                <CategoryPieChart />
+                <ActivityFeed quote={quote} history={history} />
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
 }
