@@ -1,23 +1,70 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import {
+  useEffect
+} from "react";
+
+import {
+  useRouter
+} from "next/navigation";
+
+import {
+  createClient
+} from "@/lib/supabase";
+
+
 
 export default function Home() {
+
 
   const router = useRouter();
 
 
+
   useEffect(() => {
 
-    const timer = setTimeout(() => {
-      router.push("/dashboard");
-    }, 3000);
+
+    async function checkAuth() {
 
 
-    return () => clearTimeout(timer);
+      const supabase = createClient();
+      const {
+        data
+      } = await supabase.auth.getSession();
+
+
+
+      if (data.session) {
+
+
+        router.push(
+          "/dashboard"
+        );
+
+
+      } else {
+
+
+        router.push(
+          "/login"
+        );
+
+
+      }
+
+
+    }
+
+
+
+    checkAuth();
+
+
 
   }, [router]);
+
+
+
 
 
 
@@ -33,37 +80,49 @@ export default function Home() {
     ">
 
 
+
       <div className="
-        max-w-xl
-        w-full
-        text-center
         bg-white
         rounded-3xl
         shadow-lg
         p-10
+        text-center
+        max-w-xl
+        w-full
       ">
 
 
-        {/* Logo / Icon */}
-        <div className="
-          mx-auto
-          mb-6
-          w-20
-          h-20
-          rounded-2xl
-          flex
-          items-center
-          justify-center
-          text-white
-          text-3xl
-          font-bold
-        "
-        style={{
-          background:"var(--accent)"
-        }}
+
+        <div
+
+          className="
+            w-20
+            h-20
+            mx-auto
+            rounded-2xl
+            flex
+            items-center
+            justify-center
+            text-4xl
+            text-white
+            mb-6
+          "
+
+          style={{
+
+            background:
+              "var(--accent)"
+
+          }}
+
         >
+
           📈
+
+
         </div>
+
+
 
 
 
@@ -73,21 +132,29 @@ export default function Home() {
           text-gray-900
           mb-4
         ">
+
           Stock Analytics Dashboard
+
         </h1>
+
+
 
 
 
         <p className="
           text-gray-500
-          text-base
           leading-relaxed
           mb-8
         ">
-          Track market prices, analyze stock movements,
-          and manage your personal investment records
-          in one place.
+
+          Analyze market trends,
+          compare stocks, visualize
+          performance, and manage
+          your investment records.
+
         </p>
+
+
 
 
 
@@ -96,30 +163,47 @@ export default function Home() {
           justify-center
           items-center
           gap-2
-          text-sm
           text-gray-400
+          text-sm
         ">
 
-          <div className="
-            w-2
-            h-2
-            rounded-full
-            animate-pulse
-          "
-          style={{
-            background:"var(--accent)"
-          }}
+
+
+          <span
+
+            className="
+              w-2
+              h-2
+              rounded-full
+              animate-pulse
+            "
+
+            style={{
+
+              background:
+                "var(--accent)"
+
+            }}
+
           />
 
-          Loading your dashboard...
+
+
+          Checking account...
+
+
 
         </div>
+
 
 
       </div>
 
 
+
     </main>
 
+
   );
+
 }

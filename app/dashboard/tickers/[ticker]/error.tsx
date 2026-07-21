@@ -9,7 +9,7 @@ export default function TickerError({
 }) {
   return (
     <div className="p-6">
-      <p className="text-red-600 mb-2">Couldn't find that ticker. {error.message}</p>
+      <p className="text-red-600 mb-2">Couldn&apos;t find that ticker. {error.message}</p>
       <button
         onClick={() => reset()}
         className="px-3 py-1 border rounded-lg text-sm text-gray-700"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect,useState } from "react";
+import { useEffect,useState,useCallback,useRef } from "react";
 
 
 type Ticker = {
@@ -25,23 +25,26 @@ const [form,setForm]=useState({
 
 
 
-async function loadTickers(){
+  const loadTickers = useCallback(async () => {
+    const res = await fetch("/api/ticker", {
+      credentials: "include"
+    });
 
-const res=await fetch("/api/ticker");
+    if (!res.ok) {
+      throw new Error("Failed to load tickers");
+    }
 
-const data=await res.json();
+    const data = await res.json();
+    setTickers(data);
+  }, []);
 
-setTickers(data);
+  const initialized = useRef(false);
 
-}
-
-
-
-useEffect(()=>{
-
-loadTickers();
-
-},[]);
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    loadTickers();
+  }, [loadTickers]);
 
 
 
@@ -50,17 +53,19 @@ loadTickers();
 async function addTicker(){
 
 
-await fetch("/api/ticker",{
+  await fetch("/api/ticker",{
 
-method:"POST",
+    method:"POST",
 
-headers:{
-"Content-Type":"application/json"
-},
+    headers:{
+      "Content-Type":"application/json"
+    },
 
-body:JSON.stringify(form)
+    body:JSON.stringify(form),
 
-});
+    credentials: "include"
+
+  });
 
 
 
@@ -81,12 +86,17 @@ loadTickers();
 
 async function deleteTicker(id:string){
 
-await fetch(`/api/ticker/${id}`,{
+const res = await fetch(`/api/ticker/${id}`,{
 
-method:"DELETE"
+  method:"DELETE",
+
+  credentials: "include"
 
 });
 
+if (!res.ok) {
+  console.error("Failed to delete ticker");
+}
 
 loadTickers();
 

@@ -1,292 +1,359 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
+import { Ticker } from "@/lib/types";
 
-type Ticker = {
-
-  id:string;
-  symbol:string;
-  company:string;
-  description:string;
-
-};
 
 
 
 export default function TickerDirectory({
 
-onSelect
+  onSelect
 
-}:{
+}: {
 
-onSelect:(symbol:string)=>void;
+  onSelect: (symbol: string) => void;
 
 }) {
 
 
-const [tickers,setTickers] = useState<Ticker[]>([]);
-const [loading,setLoading] = useState(true);
-const [error,setError] = useState("");
+  const [tickers, setTickers] = useState<Ticker[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  const [open, setOpen] = useState(false);
 
 
-async function fetchTickers(){
 
-try{
+  const fetchTickers = useCallback(async () => {
 
+    try {
 
-setLoading(true);
-setError("");
+      setLoading(true);
+      setError("");
 
 
+      const response = await fetch(
+        "/api/ticker",
+        { credentials: "include" }
+      );
 
-const response = await fetch(
-"/api/ticker"
-);
 
+      if (!response.ok) {
 
+        throw new Error(
+          "Failed to load tickers"
+        );
 
-if(!response.ok){
+      }
 
-throw new Error(
-"Failed to load tickers"
-);
 
-}
+      const data = await response.json();
 
 
+      setTickers(data);
 
-const data = await response.json();
 
+    }
+    catch (err) {
 
+      console.error(
+        "Failed loading tickers:",
+        err
+      );
 
-setTickers(data);
 
+      setError(
+        err instanceof Error ? err.message : "Failed loading tickers"
+      );
 
+    }
+    finally {
 
-}
+      setLoading(false);
 
-catch(err:any){
+    }
+  }, []);
 
-console.error(
-"Failed loading tickers:",
-err
-);
 
 
-setError(
-err.message
-);
 
+  const initialized = useRef(false);
 
-}
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    fetchTickers();
+  }, [fetchTickers]);
 
 
-finally{
 
-setLoading(false);
 
-}
 
-}
 
 
+  return (
 
+    <div className="mt-10">
 
 
-useEffect(()=>{
+      <button
 
-fetchTickers();
+        onClick={() => setOpen(!open)}
 
-},[]);
+        className="
+          w-full
+          flex
+          justify-between
+          items-center
+          card
+          px-5
+          py-4
+          text-left
+          font-semibold
+          text-gray-900
+          hover:bg-gray-50
+          transition
+        "
 
+      >
 
+        <span>
+          Browse Tickers
+        </span>
 
 
+        <span className="
+          text-gray-500
+          text-sm
+        ">
 
-return (
+          {open ? "▲ Collapse" : "▼ Expand"}
 
-<div className="mt-10">
+        </span>
 
 
-<h2 className="text-lg font-semibold mb-3 text-gray-900">
+      </button>
 
-Browse tickers
 
-</h2>
 
 
 
 
-<div className="card overflow-hidden">
 
+      {
+        open && (
 
+          <div className="
+            card
+            mt-3
+            overflow-hidden
+          ">
 
-{
-loading && (
 
-<p className="p-4 text-gray-500">
+            {
+              loading && (
 
-Loading tickers...
+                <p className="
+                  p-4
+                  text-gray-500
+                ">
 
-</p>
+                  Loading tickers...
 
-)
+                </p>
 
-}
+              )
 
+            }
 
 
 
 
-{
-error && (
 
-<p className="p-4 text-red-500 text-sm">
+            {
+              error && (
 
-{error}
+                <p className="
+                  p-4
+                  text-red-500
+                  text-sm
+                ">
 
-</p>
+                  {error}
 
-)
+                </p>
 
-}
+              )
 
+            }
 
 
 
 
-{
-!loading && !error && (
 
-<table className="w-full text-sm">
+            {
+              !loading && !error && (
 
+                <table className="
+                  w-full
+                  text-sm
+                ">
 
-<thead>
 
-<tr className="border-b border-gray-100 text-left text-gray-500">
+                  <thead>
 
+                    <tr className="
+                      border-b
+                      border-gray-100
+                      text-left
+                      text-gray-500
+                    ">
 
-<th className="px-4 py-3 font-medium">
 
-Ticker
+                      <th className="
+                        px-4
+                        py-3
+                        font-medium
+                      ">
 
-</th>
+                        Ticker
 
+                      </th>
 
 
-<th className="px-4 py-3 font-medium">
 
-Company
+                      <th className="
+                        px-4
+                        py-3
+                        font-medium
+                      ">
 
-</th>
+                        Company
 
+                      </th>
 
 
-<th className="px-4 py-3 font-medium">
 
-Description
+                      <th className="
+                        px-4
+                        py-3
+                        font-medium
+                      ">
 
-</th>
+                        Description
 
+                      </th>
 
-</tr>
 
-</thead>
+                    </tr>
 
+                  </thead>
 
 
 
 
-<tbody>
 
+                  <tbody>
 
-{
-tickers.map((t)=>(
 
+                    {
+                      tickers.map((t) => (
 
-<tr
+                        <tr
 
-key={t.id}
+                          key={t.id}
 
-onClick={()=>onSelect(t.symbol)}
+                          onClick={() =>
+                            onSelect(t.symbol)
+                          }
 
-className="
-border-b
-border-gray-50
-last:border-0
-hover:bg-[var(--accent-light)]
-transition-colors
-cursor-pointer
-"
+                          className="
+                            border-b
+                            border-gray-50
+                            last:border-0
+                            hover:bg-[var(--accent-light)]
+                            transition-colors
+                            cursor-pointer
+                          "
 
->
+                        >
 
 
-<td
+                          <td
 
-className="
-px-4
-py-3
-font-semibold
-"
+                            className="
+                              px-4
+                              py-3
+                              font-semibold
+                            "
 
-style={{
-color:"var(--accent)"
-}}
+                            style={{
+                              color:"var(--accent)"
+                            }}
 
->
+                          >
 
-{t.symbol}
+                            {t.symbol}
 
-</td>
+                          </td>
 
 
 
 
-<td className="px-4 py-3 text-gray-900">
+                          <td className="
+                            px-4
+                            py-3
+                            text-gray-900
+                          ">
 
-{t.company}
+                            {t.company}
 
-</td>
+                          </td>
 
 
 
 
-<td className="px-4 py-3 text-gray-500">
+                          <td className="
+                            px-4
+                            py-3
+                            text-gray-500
+                          ">
 
-{t.description}
+                            {t.description}
 
-</td>
+                          </td>
 
 
 
-</tr>
+                        </tr>
 
+                      ))
 
-))
+                    }
 
-}
 
+                  </tbody>
 
 
-</tbody>
+                </table>
 
+              )
 
-</table>
+            }
 
-)
 
-}
+          </div>
 
+        )
 
+      }
 
-</div>
 
 
-</div>
+    </div>
 
-);
+  );
 
 }
