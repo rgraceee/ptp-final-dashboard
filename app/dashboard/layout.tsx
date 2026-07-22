@@ -1,5 +1,12 @@
 import { RecordsProvider } from "@/lib/RecordsContext";
+import ThemeProvider from "@/components/ThemeProvider";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <RecordsProvider>{children}</RecordsProvider>;
+  return (
+    <ThemeProvider>
+      <RecordsProvider>
+        {children}
+      </RecordsProvider>
+    </ThemeProvider>
+  );
 }

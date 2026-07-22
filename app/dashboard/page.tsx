@@ -20,7 +20,7 @@ import { TrendingUp, BarChart3, Wallet, ArrowUpRight, ArrowDownRight, AudioLines
 
 function SkeletonStatCard() {
   return (
-    <div className="rounded-xl border border-gray-200/60 bg-white shadow-sm p-5 w-full h-full">
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-sm p-5 w-full h-full">
       <div className="h-3 w-20 rounded shimmer mb-3" />
       <div className="h-7 w-28 rounded shimmer mb-3" />
       <div className="h-4 w-16 rounded shimmer" />
@@ -174,11 +174,11 @@ export default function DashboardPage() {
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {error && (
-          <div className="card-static border-red-100 bg-red-50/80 p-4 mb-6 flex items-center gap-3 animate-fade-in-up">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 text-sm font-bold">
+          <div className="card-static border-red-100 bg-red-50/80 dark:border-red-900/50 dark:bg-red-900/20 p-4 mb-6 flex items-center gap-3 animate-fade-in-up">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 text-sm font-bold">
               !
             </div>
-            <p className="text-red-700 text-sm font-medium">{error}</p>
+            <p className="text-red-700 dark:text-red-300 text-sm font-medium">{error}</p>
           </div>
         )}
 
@@ -244,7 +244,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="section-header">
-              <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Market Overview</h2>
+              <h2 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider">Market Overview</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -263,12 +263,12 @@ export default function DashboardPage() {
             </div>
 
             <div className="section-header pt-2">
-              <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Compare Stocks</h2>
+              <h2 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider">Compare Stocks</h2>
             </div>
             <TickerComparison />
 
             <div className="section-header pt-2">
-              <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Your Records</h2>
+              <h2 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider">Your Records</h2>
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               <div className="xl:col-span-2">

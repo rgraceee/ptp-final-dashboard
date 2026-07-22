@@ -30,21 +30,21 @@ export default function RecordsStats({ stats, loading }: Props) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {statCards.map((s) => (
-        <div key={s.key} className="bg-white rounded-xl border border-gray-200/60 shadow-sm p-5">
+        <div key={s.key} className="bg-[var(--surface)] rounded-xl border border-[var(--border)] shadow-sm p-5">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-gray-400">
+              <p className="text-xs font-medium text-[var(--text-muted)]">
                 {s.label}
               </p>
               {loading ? (
                 <div className="h-7 w-20 rounded shimmer mt-2" />
               ) : (
-                <p className="text-2xl font-semibold text-gray-900 mt-2 tracking-tight">
+                <p className="text-2xl font-semibold text-[var(--text-primary)] mt-2 tracking-tight">
                   {values[s.key]}
                 </p>
               )}
               {s.key === "avg" && !loading && stats.latestEntry && (
-                <p className="text-[11px] text-gray-400 mt-2 flex items-center gap-1">
+                <p className="text-[11px] text-[var(--text-muted)] mt-2 flex items-center gap-1">
                   <Clock size={11} />
                   Latest: {stats.latestEntry.ticker} ({stats.latestEntry.date})
                 </p>

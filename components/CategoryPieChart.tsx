@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "@/components/ThemeProvider";
 import { useMemo } from "react";
 import { useRecords } from "@/lib/RecordsContext";
 import {
@@ -24,7 +25,7 @@ const CustomLegend = ({ payload }: { payload?: Array<{ value: string; color: str
       {payload.map((entry, index) => (
         <div key={index} className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-          <span className="text-xs font-medium text-gray-600">{entry.value}</span>
+          <span className="text-xs font-medium text-[var(--text-primary)]">{entry.value}</span>
         </div>
       ))}
     </div>
@@ -32,6 +33,8 @@ const CustomLegend = ({ payload }: { payload?: Array<{ value: string; color: str
 };
 
 export default function CategoryPieChart() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const { records, loading: recordsLoading } = useRecords();
 
   const data = useMemo<CategoryData[]>(() => {
@@ -46,6 +49,11 @@ export default function CategoryPieChart() {
     }));
   }, [records]);
 
+  const tooltipBg = isDark ? "rgba(28,28,32,0.95)" : "rgba(255,255,255,0.95)";
+  const tooltipBorder = isDark ? "#2e2e33" : "#f0f1f3";
+  const tooltipShadow = isDark ? "0 12px 32px rgba(0,0,0,0.4)" : "0 12px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)";
+  const tooltipColor = isDark ? "#f3f4f6" : "#111827";
+
   if (recordsLoading) {
     return (
       <div className="card-static p-5">
@@ -58,8 +66,8 @@ export default function CategoryPieChart() {
   if (data.length === 0) {
     return (
       <div className="card-static p-5">
-        <h2 className="font-semibold text-gray-900 text-base mb-4">Category Breakdown</h2>
-        <p className="text-gray-400 text-sm">No category data yet.</p>
+        <h2 className="font-semibold text-[var(--text-primary)] text-base mb-4">Category Breakdown</h2>
+        <p className="text-[var(--text-muted)] text-sm">No category data yet.</p>
       </div>
     );
   }
@@ -71,7 +79,7 @@ export default function CategoryPieChart() {
 
   return (
     <div className="card-static p-5 h-80 animate-fade-in-up">
-      <h2 className="font-semibold text-gray-900 text-base mb-2">Category Breakdown</h2>
+      <h2 className="font-semibold text-[var(--text-primary)] text-base mb-2">Category Breakdown</h2>
 
       <ResponsiveContainer width="100%" height="80%">
         <PieChart>
@@ -97,13 +105,14 @@ export default function CategoryPieChart() {
 
           <Tooltip
             contentStyle={{
-              backgroundColor: "rgba(255,255,255,0.95)",
+              backgroundColor: tooltipBg,
               backdropFilter: "blur(12px)",
-              border: "1px solid #f0f1f3",
+              border: `1px solid ${tooltipBorder}`,
               borderRadius: "14px",
-              boxShadow: "0 12px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)",
+              boxShadow: tooltipShadow,
               fontSize: "13px",
               padding: "12px 16px",
+              color: tooltipColor,
             }}
             formatter={(value) => [
               `$${Number(value).toFixed(2)}`,

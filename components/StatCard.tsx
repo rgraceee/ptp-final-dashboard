@@ -25,17 +25,17 @@ export default function StatCard({ label, value, change, icon, gradient = "price
   const circle = circleStyles[gradient] || circleStyles.price;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200/60 shadow-sm p-5 w-full h-full transition-shadow duration-200 hover:shadow-md">
+    <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] shadow-sm p-5 w-full h-full transition-shadow duration-200 hover:shadow-md">
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+          <p className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
             {label}
           </p>
-          <p className={`mt-2 tracking-tight font-semibold text-gray-900 ${highlight ? "text-3xl" : "text-2xl"}`}>
+          <p className={`mt-2 tracking-tight font-semibold text-[var(--text-primary)] ${highlight ? "text-3xl" : "text-2xl"}`}>
             {value}
           </p>
           {change && (
-            <p className={`text-xs font-medium mt-2 ${isPositive ? "text-emerald-600" : "text-red-500"}`}>
+            <p className={`text-xs font-medium mt-2 ${isPositive ? "text-emerald-500" : "text-red-400"}`}>
               {isPositive ? "+" : ""}{change}
             </p>
           )}
@@ -48,4 +48,4 @@ export default function StatCard({ label, value, change, icon, gradient = "price
       </div>
     </div>
   );
-}
+  }

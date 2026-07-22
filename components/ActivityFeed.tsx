@@ -65,12 +65,12 @@ export default function ActivityFeed({ quote, history, records }: Props) {
 
   return (
     <div className="card-static p-5">
-      <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
         Activity Feed
       </h3>
       <div className="space-y-0">
         {activities.length === 0 ? (
-          <p className="text-sm text-gray-400">No recent activity.</p>
+          <p className="text-sm text-[var(--text-muted)]">No recent activity.</p>
         ) : (
           activities.map((item) => {
             const style = typeStyles[item.type];
@@ -81,12 +81,12 @@ export default function ActivityFeed({ quote, history, records }: Props) {
                   <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${style.bg} ${style.dot.replace("bg-", "text-")} opacity-80 group-hover/item:opacity-100 transition-opacity`}>
                     <Icon size={14} className={style.dot.replace("bg-", "text-")} />
                   </div>
-                  <div className="w-px flex-1 bg-gray-100 mt-1.5" />
+                  <div className="w-px flex-1 bg-[var(--border-subtle)] mt-1.5" />
                 </div>
                 <div className="flex-1 min-w-0 pb-4">
-                  <p className="text-sm font-medium text-gray-900">{item.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
-                  <p className="text-[11px] text-gray-400 mt-1">{item.time}</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">{item.title}</p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">{item.description}</p>
+                  <p className="text-[11px] text-[var(--text-muted)] mt-1">{item.time}</p>
                 </div>
               </div>
             );

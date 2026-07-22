@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@/components/ThemeProvider";
 import { createClient } from "@/lib/supabase";
-import { LogOut, RefreshCw, Search, ChevronDown, TrendingUp } from "lucide-react";
+import { LogOut, RefreshCw, Search, ChevronDown, TrendingUp, Moon, Sun } from "lucide-react";
 import Swal from "sweetalert2";
 
 type TopBarProps = {
@@ -15,6 +16,7 @@ type TopBarProps = {
 
 export default function TopBar({ userEmail, onRefresh, refreshing, onSearch }: TopBarProps) {
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [showProfile, setShowProfile] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
@@ -109,7 +111,7 @@ export default function TopBar({ userEmail, onRefresh, refreshing, onSearch }: T
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-xl nav-shadow border-b border-gray-100/80">
+    <header className="sticky top-0 z-40 w-full bg-[var(--surface)]/80 backdrop-blur-xl nav-shadow border-b border-[var(--border)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -124,36 +126,49 @@ export default function TopBar({ userEmail, onRefresh, refreshing, onSearch }: T
                   style={{ boxShadow: "0 0 20px rgba(139, 26, 58, 0.3)" }} />
               </div>
               <div className="hidden md:block">
-                <p className="text-sm font-bold text-gray-900 tracking-tight leading-tight">
+                <p className="text-sm font-bold text-[var(--text-primary)] tracking-tight leading-tight">
                   Stock Analytics
                 </p>
-                <p className="text-[11px] text-gray-400 leading-tight">
+                <p className="text-[11px] text-[var(--text-muted)] leading-tight">
                   Portfolio & Market Intelligence
                 </p>
               </div>
             </button>
 
-            <div className="hidden md:block h-6 w-px bg-gray-200/80" />
+            <div className="hidden md:block h-6 w-px bg-[var(--border)]" />
 
             <form onSubmit={handleSearchSubmit} className="hidden md:block">
               <div className="relative group">
-                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-[var(--accent)]" />
+                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] transition-colors group-focus-within:text-[var(--accent)]" />
                 <input
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
                   placeholder="Search any ticker..."
-                  className="h-10 w-64 pl-9 pr-4 rounded-xl border border-gray-200/80 bg-gray-50/50 text-sm outline-none transition-all duration-200 hover:bg-white hover:border-gray-300 focus:bg-white focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-glow)]"
+                  className="h-10 w-64 pl-9 pr-4 rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] text-sm text-[var(--text-primary)] outline-none transition-all duration-200 hover:bg-[var(--surface)] hover:border-[var(--border)] focus:bg-[var(--surface)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-glow)]"
                 />
               </div>
             </form>
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="relative flex items-center justify-center h-9 w-9 rounded-full transition-all duration-200 flex-shrink-0"
+              style={{
+                background: theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border)",
+              }}
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
             {onRefresh && (
               <button
                 onClick={handleRefreshClick}
                 disabled={refreshing}
-                className="btn btn-ghost h-9 px-3 text-gray-500 hover:text-gray-900 hover:bg-gray-100/80 rounded-xl transition-all duration-200"
+                className="btn btn-ghost h-9 px-3 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-sunken)] rounded-xl transition-all duration-200"
                 title="Refresh data"
               >
                 <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
@@ -164,7 +179,7 @@ export default function TopBar({ userEmail, onRefresh, refreshing, onSearch }: T
             <div className="relative">
               <button
                 onClick={() => setShowProfile(!showProfile)}
-                className="flex items-center gap-2.5 rounded-xl border border-gray-200/80 bg-white px-2 py-1.5 pr-3 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md hover:bg-gray-50/50"
+                className="flex items-center gap-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 pr-3 shadow-sm transition-all duration-200 hover:border-[var(--border)] hover:shadow-md hover:bg-[var(--surface-raised)]"
               >
                 <div
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-white text-sm font-bold shadow-sm"
@@ -173,24 +188,24 @@ export default function TopBar({ userEmail, onRefresh, refreshing, onSearch }: T
                   {userEmail ? userEmail.charAt(0).toUpperCase() : "U"}
                 </div>
                 <div className="hidden lg:block text-left">
-                  <p className="text-sm font-medium text-gray-700 leading-tight max-w-[140px] truncate">
+                  <p className="text-sm font-medium text-[var(--text-primary)] leading-tight max-w-[140px] truncate">
                     {userEmail || "User"}
                   </p>
                 </div>
-                <ChevronDown size={14} className="text-gray-400" />
+                <ChevronDown size={14} className="text-[var(--text-muted)]" />
               </button>
 
               {showProfile && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowProfile(false)} />
-                  <div className="absolute right-0 mt-2 w-52 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl animate-fade-in-up z-50">
-                    <div className="px-3 py-2 border-b border-gray-100 mb-1">
-                      <p className="text-xs text-gray-400">Signed in as</p>
-                      <p className="text-sm font-medium text-gray-700 truncate">{userEmail}</p>
+                  <div className="absolute right-0 mt-2 w-52 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1.5 shadow-xl animate-fade-in-up z-50">
+                    <div className="px-3 py-2 border-b border-[var(--border-subtle)] mb-1">
+                      <p className="text-xs text-[var(--text-muted)]">Signed in as</p>
+                      <p className="text-sm font-medium text-[var(--text-primary)] truncate">{userEmail}</p>
                     </div>
                     <button
                       onClick={handleSignOut}
-                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-500 hover:bg-red-500/10 transition-colors"
                     >
                       <LogOut size={15} />
                       Sign Out

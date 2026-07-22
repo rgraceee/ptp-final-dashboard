@@ -215,12 +215,12 @@ export default function RecordForm() {
   }
 
   const inputBase =
-    "h-10 rounded-lg border border-gray-200/80 bg-white px-3 text-sm outline-none transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[rgba(139,26,58,0.12)] hover:border-gray-300";
+    "h-10 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-sm text-[var(--text-primary)] outline-none transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-glow)] hover:border-[var(--border)]";
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gray-900 tracking-tight">
+        <h2 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">
           {editingId ? "Edit Record" : "Add Record"}
         </h2>
         <button
@@ -241,7 +241,7 @@ export default function RecordForm() {
       >
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex-1 min-w-[140px]">
-            <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 ml-1">
               Ticker
             </label>
             <input
@@ -258,7 +258,7 @@ export default function RecordForm() {
           </div>
 
           <div className="w-[160px]">
-            <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 ml-1">
               Date
             </label>
             <input
@@ -275,7 +275,7 @@ export default function RecordForm() {
           </div>
 
           <div className="w-[140px]">
-            <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 ml-1">
               Price
             </label>
             <input
@@ -294,7 +294,7 @@ export default function RecordForm() {
           </div>
 
           <div className="w-[130px]">
-            <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 ml-1">
               Category
             </label>
             <select
@@ -308,7 +308,7 @@ export default function RecordForm() {
           </div>
 
           <div className="flex-1 min-w-[160px]">
-            <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 ml-1">
               Notes
             </label>
             <input

@@ -28,14 +28,14 @@ export default function RecordsFilters({
   hasActiveFilters,
 }: Props) {
   const inputBase =
-    "h-10 rounded-lg border border-gray-200/80 bg-white px-3 text-sm outline-none transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[rgba(139,26,58,0.12)] hover:border-gray-300";
+    "h-10 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 text-sm text-[var(--text-primary)] outline-none transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-glow)] hover:border-[var(--border)]";
 
   return (
     <div className="card-static p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Filter size={14} className="text-gray-400" />
-          <h3 className="font-semibold text-gray-900 text-sm">
+          <Filter size={14} className="text-[var(--text-muted)]" />
+          <h3 className="font-semibold text-[var(--text-primary)] text-sm">
             Filters
           </h3>
           {hasActiveFilters && (

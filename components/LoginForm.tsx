@@ -133,19 +133,19 @@ export default function LoginForm({ onToggleMode, isSignup }: LoginFormProps) {
             <TrendingUp size={18} />
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+        <h1 className="text-2xl font-bold text-white tracking-tight">
           {isSignup ? "Create account" : "Welcome back"}
         </h1>
-        <p className="text-gray-400 text-sm mt-1.5">
+        <p className="text-white/70 text-sm mt-1.5">
           {isSignup ? "Start your portfolio journey" : "Sign in to your dashboard"}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">
-            Email
-          </label>
+        <label className="block text-xs font-medium text-white/70 mb-1.5 ml-1">
+          Email
+        </label>
           <input
             type="email"
             value={email}
@@ -157,9 +157,9 @@ export default function LoginForm({ onToggleMode, isSignup }: LoginFormProps) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">
-            Password
-          </label>
+        <label className="block text-xs font-medium text-white/70 mb-1.5 ml-1">
+          Password
+        </label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -173,7 +173,7 @@ export default function LoginForm({ onToggleMode, isSignup }: LoginFormProps) {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
               tabIndex={-1}
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -199,8 +199,8 @@ export default function LoginForm({ onToggleMode, isSignup }: LoginFormProps) {
       </form>
 
       {message && (
-        <div className="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-4">
-          <p className="text-center text-sm text-gray-600">
+        <div className="mt-5 rounded-xl border border-white/10 bg-white/10 p-4">
+          <p className="text-center text-sm text-white/90">
             {message}
           </p>
         </div>
@@ -208,7 +208,7 @@ export default function LoginForm({ onToggleMode, isSignup }: LoginFormProps) {
 
       <div className="mt-6 text-center text-sm">
         {isSignup ? (
-          <span className="text-gray-400">
+          <span className="text-white/70">
             Already have an account?{" "}
             <button
               onClick={onToggleMode}
@@ -219,7 +219,7 @@ export default function LoginForm({ onToggleMode, isSignup }: LoginFormProps) {
             </button>
           </span>
         ) : (
-          <span className="text-gray-400">
+          <span className="text-white/70">
             Don&apos;t have an account?{" "}
             <button
               onClick={onToggleMode}

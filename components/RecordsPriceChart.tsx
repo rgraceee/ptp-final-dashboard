@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "@/components/ThemeProvider";
 import {
   AreaChart,
   Area,
@@ -21,14 +22,23 @@ type Props = {
 };
 
 export default function RecordsPriceChart({ data, loading }: Props) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const gridColor = isDark ? "#2e2e33" : "#f3f4f6";
+  const tickColor = isDark ? "#6b7280" : "#9ca3af";
+  const axisStroke = isDark ? "#2e2e33" : "#e5e7eb";
+  const tooltipBg = isDark ? "rgba(28,28,32,0.95)" : "rgba(255,255,255,0.95)";
+  const tooltipBorder = isDark ? "#2e2e33" : "#f0f1f3";
+  const tooltipShadow = isDark ? "0 12px 32px rgba(0,0,0,0.4)" : "0 12px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)";
+
   if (data.length === 0 && !loading) {
     return (
       <div className="card-static p-10 text-center animate-fade-in-up">
-        <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-gray-100 text-gray-400 mb-4">
+        <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-[var(--surface-sunken)] text-[var(--text-muted)] mb-4">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         </div>
-        <p className="text-gray-600 text-sm font-medium">Not enough data to display chart.</p>
-        <p className="text-gray-400 text-xs mt-1.5">
+        <p className="text-[var(--text-secondary)] text-sm font-medium">Not enough data to display chart.</p>
+        <p className="text-[var(--text-muted)] text-xs mt-1.5">
           Add at least 2 records to see price trends.
         </p>
       </div>
@@ -47,8 +57,8 @@ export default function RecordsPriceChart({ data, loading }: Props) {
   return (
     <div className="card-static p-6 h-80 w-full animate-fade-in-up">
       <div className="mb-4">
-        <h3 className="font-semibold text-gray-900 text-base">Price Over Time</h3>
-        <p className="text-sm text-gray-400 mt-0.5">
+        <h3 className="font-semibold text-[var(--text-primary)] text-base">Price Over Time</h3>
+        <p className="text-sm text-[var(--text-muted)] mt-0.5">
           Historical prices from your records
         </p>
       </div>
@@ -63,34 +73,35 @@ export default function RecordsPriceChart({ data, loading }: Props) {
             </linearGradient>
           </defs>
 
-          <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
 
           <XAxis
             dataKey="date"
-            tick={{ fontSize: 11, fill: "#9ca3af" }}
+            tick={{ fontSize: 11, fill: tickColor }}
             minTickGap={20}
-            stroke="#e5e7eb"
+            stroke={axisStroke}
             axisLine={false}
             tickLine={false}
           />
 
           <YAxis
             domain={["auto", "auto"]}
-            tick={{ fontSize: 11, fill: "#9ca3af" }}
-            stroke="#e5e7eb"
+            tick={{ fontSize: 11, fill: tickColor }}
+            stroke={axisStroke}
             axisLine={false}
             tickLine={false}
           />
 
           <Tooltip
             contentStyle={{
-              backgroundColor: "rgba(255,255,255,0.95)",
+              backgroundColor: tooltipBg,
               backdropFilter: "blur(12px)",
-              border: "1px solid #f0f1f3",
+              border: `1px solid ${tooltipBorder}`,
               borderRadius: "14px",
-              boxShadow: "0 12px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)",
+              boxShadow: tooltipShadow,
               fontSize: "13px",
               padding: "12px 16px",
+              color: isDark ? "#f3f4f6" : "#111827",
             }}
             formatter={(value) => [`$${Number(value).toFixed(2)}`, "Price"]}
           />
@@ -102,7 +113,7 @@ export default function RecordsPriceChart({ data, loading }: Props) {
             fill="url(#recordsPriceGradient)"
             strokeWidth={2.5}
             dot={false}
-            activeDot={{ r: 5, strokeWidth: 2, fill: "#fff", stroke: "var(--accent)" }}
+            activeDot={{ r: 5, strokeWidth: 2, fill: isDark ? "#1c1c20" : "#fff", stroke: "var(--accent)" }}
           />
         </AreaChart>
       </ResponsiveContainer>
