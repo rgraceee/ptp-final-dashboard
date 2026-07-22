@@ -247,7 +247,7 @@ export default function RecordForm() {
             <input
               value={ticker}
               onChange={(e) => setTicker(e.target.value)}
-              placeholder="AAPL"
+              placeholder="Input ticker (e.g., AAPL, etc.)"
               className={`${inputBase} ${fieldErrors.ticker ? "input-error" : ""}`}
               required
               maxLength={5}

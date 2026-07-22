@@ -40,43 +40,11 @@ body {
 
 /* ─── Card System ──────────────────────────────────────────── */
 
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-  border-color: var(--border);
-}
-
 .card-static {
   background: var(--surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xs);
-}
-
-.card-accent {
-  position: relative;
-  overflow: hidden;
-}
-
-.card-accent::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(139, 26, 58, 0.3), rgba(139, 26, 58, 0.05));
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
-  pointer-events: none;
 }
 
 /* ─── Section Header ──────────────────────────────────────── */
@@ -210,17 +178,6 @@ body {
   color: var(--text-primary);
 }
 
-.btn-danger {
-  background: #fff;
-  color: #ef4444;
-  border: 1px solid #fecaca;
-}
-
-.btn-danger:hover {
-  background: #fef2f2;
-  border-color: #ef4444;
-}
-
 .btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -250,15 +207,6 @@ body {
   border: 1px solid rgba(153, 27, 27, 0.1);
 }
 
-/* ─── Glass ───────────────────────────────────────────────── */
-
-.glass {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-}
-
 /* ─── Dashboard Background ────────────────────────────────── */
 
 .gradient-soft {
@@ -268,24 +216,6 @@ body {
     radial-gradient(ellipse at 50% 50%, rgba(139, 26, 58, 0.02) 0%, transparent 70%),
     linear-gradient(180deg, #fefbfc 0%, #f8f9fb 40%, #f6f5fa 100%);
   min-height: 100vh;
-}
-
-/* ─── Chart Tooltip ───────────────────────────────────────── */
-
-.chart-tooltip {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid var(--border-subtle) !important;
-  border-radius: 14px !important;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
-  font-size: 13px !important;
-  padding: 12px 16px !important;
-}
-
-.chart-tooltip .recharts-tooltip-label {
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 4px;
 }
 
 /* ─── Animations ──────────────────────────────────────────── */
@@ -305,28 +235,6 @@ body {
   animation: fade-in-up 0.4s ease forwards;
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(139, 26, 58, 0.35);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(139, 26, 58, 0);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2.2s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
 @keyframes stagger-in {
   from {
     opacity: 0;
@@ -341,16 +249,6 @@ body {
 .animate-stagger-in {
   animation: stagger-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   opacity: 0;
-}
-
-/* ─── Glass Card ──────────────────────────────────────────── */
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: var(--shadow-sm);
 }
 
 /* ─── Nav Shadow ──────────────────────────────────────────── */

@@ -8,20 +8,6 @@ export type RecordType = {
   user_id?: string | null;
 };
 
-export type RecordStats = {
-  totalRecords: number;
-  totalValue: number;
-  averagePrice: number;
-  latestEntry: { date: string; ticker: string } | null;
-};
-
-export type Ticker = {
-  id: string;
-  symbol: string;
-  company: string;
-  description: string;
-};
-
 export type QuoteType = {
   symbol: string;
   price: number;

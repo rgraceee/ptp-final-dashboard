@@ -114,7 +114,6 @@ isMock:true
 
 
 
-
 function mockDailyHistory(){
 
 const points: Array<{ date: string; close: number; isMock: boolean }> = [];
@@ -166,8 +165,6 @@ return points;
 
 
 
-
-
 // ---------- QUOTE ----------
 
 
@@ -204,13 +201,6 @@ await res.json();
 
 
 
-console.log(
-"QUOTE RESPONSE:",
-data
-);
-
-
-
 const q =
 data["Global Quote"];
 
@@ -218,22 +208,15 @@ data["Global Quote"];
 
 
 
+
 if(
-!q ||
-!q["05. price"]
+  !q ||
+  !q["05. price"]
 ){
-
-console.warn(
-"Alpha Vantage unavailable. Using fallback."
-);
-
 
 return mockQuote(symbol);
 
 }
-
-
-
 
 
 return {
@@ -279,12 +262,6 @@ return {
 catch(error){
 
 
-console.error(
-"Quote error:",
-error
-);
-
-
 
 return mockQuote(symbol);
 
@@ -294,9 +271,6 @@ return mockQuote(symbol);
 
 
 }
-
-
-
 
 
 
@@ -339,13 +313,6 @@ await res.json();
 
 
 
-console.log(
-"OVERVIEW RESPONSE:",
-data
-);
-
-
-
 
 if(
 !data.Name
@@ -354,7 +321,6 @@ if(
 return mockOverview(symbol);
 
 }
-
 
 
 
@@ -380,12 +346,6 @@ isMock:false
 catch(error){
 
 
-console.error(
-"Overview error:",
-error
-);
-
-
 
 return mockOverview(symbol);
 
@@ -395,9 +355,6 @@ return mockOverview(symbol);
 
 
 }
-
-
-
 
 
 
@@ -440,13 +397,6 @@ await res.json();
 
 
 
-console.log(
-"HISTORY RESPONSE:",
-data
-);
-
-
-
 const series =
 data["Time Series (Daily)"];
 
@@ -454,16 +404,14 @@ data["Time Series (Daily)"];
 
 
 
-if(!series){
 
-console.warn(
-"No history. Using fallback."
-);
+if(!series){
 
 
 return mockDailyHistory();
 
 }
+
 
 
 
@@ -506,253 +454,9 @@ return Object.entries(series)
 catch(error){
 
 
-console.error(
-"History error:",
-error
-);
-
-
 
 return mockDailyHistory();
 
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ---------- TOP MOVERS ----------
-
-
-export async function getTopMovers(){
-
-
-try{
-
-
-const res =
-await fetch(
-
-`${BASE}?function=TOP_GAINERS_LOSERS&apikey=${KEY}`,
-
-{
-next:{
-revalidate:300
-}
-}
-
-);
-
-
-
-const data =
-await res.json();
-
-
-
-return {
-
-gainers:
-(data.top_gainers ?? []).slice(0,5),
-
-
-losers:
-(data.top_losers ?? []).slice(0,5)
-
-};
-
-
-
-}
-catch{
-
-return {
-
-gainers:[],
-
-losers:[]
-
-};
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ---------- CRYPTO ----------
-
-
-export async function getCryptoPrice(symbol:string){
-
-
-try{
-
-
-const res =
-await fetch(
-
-`${BASE}?function=CURRENCY_EXCHANGE_RATE&from_currency=${symbol}&to_currency=USD&apikey=${KEY}`,
-
-{
-next:{
-revalidate:60
-}
-}
-
-);
-
-
-
-const data =
-await res.json();
-
-
-
-const rate =
-data["Realtime Currency Exchange Rate"];
-
-
-
-
-if(!rate){
-
-throw new Error(
-"No crypto data"
-);
-
-}
-
-
-
-
-return {
-
-  symbol,
-
-  price:
-  parseFloat(
-    rate["5. Exchange Rate"]
-  )
-
-};
-
-
-
-}
-catch(error){
-
-throw error;
-
-}
-
-
-}
-
-
-
-
-
-
-
-
-
-// ---------- INTRADAY ----------
-
-
-export async function getIntraday(symbol:string){
-
-
-try{
-
-
-const res =
-await fetch(
-
-`${BASE}?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${KEY}`,
-
-{
-next:{
-revalidate:60
-}
-}
-
-);
-
-
-
-const data =
-await res.json();
-
-
-
-const series =
-data["Time Series (5min)"];
-
-
-
-if(!series)
-return [];
-
-
-
-
-
-return Object.entries(series)
-
-.slice(0,20)
-
-.map(
-
-([time,values])=>{
-
-  const record = values as Record<string, unknown>;
-
-  return {
-
-
-    time:
-    time.split(" ")[1],
-
-
-
-    price:
-    parseFloat(
-      record["4. close"] as string
-    )
-
-
-  };
-
-}
-
-)
-
-.reverse();
-
-
-
-}
-catch{
-
-return [];
 
 }
 
