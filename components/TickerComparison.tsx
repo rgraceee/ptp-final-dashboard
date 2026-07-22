@@ -10,7 +10,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   CartesianGrid,
   ResponsiveContainer,
   Cell,
@@ -32,10 +31,10 @@ const AVAILABLE_TICKERS = [
 ];
 
 const COLORS = [
+  "#8B1A3A",
+  "#7c3aed",
+  "#059669",
   "#2563eb",
-  "#16a34a",
-  "#dc2626",
-  "#9333ea",
   "#ea580c",
   "#0891b2",
   "#db2777",
@@ -140,22 +139,28 @@ export default function TickerComparison() {
   const chartData = mergeData(histories);
 
   return (
-    <div className="mt-10">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Compare Stocks</h2>
-
-      <div className="flex flex-wrap gap-2 mb-4">
+    <div className="space-y-5">
+      <div className="flex flex-wrap gap-2">
         {AVAILABLE_TICKERS.map((ticker, index) => {
           const active = selected.includes(ticker);
           return (
             <button
               key={ticker}
               onClick={() => toggleTicker(ticker)}
-              className="px-4 py-2 rounded-full text-sm font-semibold border transition-all"
-              style={{
-                background: active ? getColor(index) : "white",
-                color: active ? "white" : "#374151",
-                borderColor: active ? getColor(index) : "#e5e7eb",
-              }}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border ${
+                active
+                  ? "text-white shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                  : "bg-white text-gray-600 border-gray-200/80 hover:border-gray-300 hover:bg-gray-50"
+              }`}
+              style={
+                active
+                  ? {
+                      background: getColor(index),
+                      borderColor: getColor(index),
+                      boxShadow: `0 4px 12px ${getColor(index)}33`,
+                    }
+                  : undefined
+              }
             >
               {ticker}
             </button>
@@ -164,36 +169,48 @@ export default function TickerComparison() {
       </div>
 
       {loading && (
-        <p className="text-gray-500 text-sm">Loading comparison...</p>
+        <div className="space-y-4">
+          <div className="card-static p-5 h-80">
+            <div className="h-5 w-56 rounded shimmer mb-3" />
+            <div className="h-64 w-full shimmer rounded-lg" />
+          </div>
+        </div>
       )}
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && (
+        <div className="card-static border-red-100 bg-red-50/80 p-4 flex items-center gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600 text-xs font-bold">!</div>
+          <p className="text-red-700 text-sm font-medium">{error}</p>
+        </div>
+      )}
 
       {chartData.length > 0 && !loading && (
-        <div className="card p-5 h-80 mb-6">
-          <h3 className="font-semibold text-gray-900 mb-3">Price History Comparison</h3>
+        <div className="card-static p-5 h-80 animate-fade-in-up">
+          <h3 className="font-semibold text-gray-900 mb-3 text-base">Price History Comparison</h3>
           <ResponsiveContainer width="100%" height="85%">
             <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 24, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f1f3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 11, fill: "#9ca3af" }}
                 minTickGap={20}
                 stroke="#e5e7eb"
+                axisLine={false}
+                tickLine={false}
               />
-              <YAxis domain={["auto", "auto"]} tick={{ fontSize: 11, fill: "#9ca3af" }} stroke="#e5e7eb" width={40} />
+              <YAxis domain={["auto", "auto"]} tick={{ fontSize: 11, fill: "#9ca3af" }} stroke="#e5e7eb" width={40} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "rgba(255,255,255,0.96)",
-                  border: "1px solid #e5e7eb",
+                  backgroundColor: "rgba(255,255,255,0.95)",
+                  backdropFilter: "blur(12px)",
+                  border: "1px solid #f0f1f3",
                   borderRadius: "14px",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+                  boxShadow: "0 12px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)",
                   fontSize: "13px",
-                  padding: "10px 14px",
+                  padding: "12px 16px",
                 }}
                 formatter={(value) => [`$${Number(value).toFixed(2)}`, ""]}
               />
-              <Legend />
               {selected.map((ticker, index) => (
                 <Line
                   key={ticker}
@@ -202,7 +219,7 @@ export default function TickerComparison() {
                   stroke={getColor(index)}
                   dot={false}
                   strokeWidth={2}
-                  activeDot={{ r: 4, strokeWidth: 2 }}
+                  activeDot={{ r: 5, strokeWidth: 2, fill: "#fff", stroke: getColor(index) }}
                 />
               ))}
             </LineChart>
@@ -211,27 +228,28 @@ export default function TickerComparison() {
       )}
 
       {latestPrices.length > 0 && !loading && (
-        <div className="card p-5 h-72">
-          <h3 className="font-semibold text-gray-900 mb-3">Current Price Comparison</h3>
+        <div className="card-static p-5 h-72 animate-fade-in-up">
+          <h3 className="font-semibold text-gray-900 mb-3 text-base">Current Price Comparison</h3>
           <ResponsiveContainer width="100%" height="85%">
             <BarChart data={latestPrices}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f1f3" />
-              <XAxis dataKey="symbol" tick={{ fontSize: 12, fill: "#6b7280" }} stroke="#e5e7eb" />
-              <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} stroke="#e5e7eb" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+              <XAxis dataKey="symbol" tick={{ fontSize: 12, fill: "#6b7280" }} stroke="#e5e7eb" axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} stroke="#e5e7eb" axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "rgba(255,255,255,0.96)",
-                  border: "1px solid #e5e7eb",
+                  backgroundColor: "rgba(255,255,255,0.95)",
+                  backdropFilter: "blur(12px)",
+                  border: "1px solid #f0f1f3",
                   borderRadius: "14px",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+                  boxShadow: "0 12px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)",
                   fontSize: "13px",
-                  padding: "10px 14px",
+                  padding: "12px 16px",
                 }}
                 formatter={(value) => [`$${Number(value).toFixed(2)}`, "Price"]}
               />
               <Bar dataKey="price" radius={[8, 8, 0, 0]}>
                 {latestPrices.map((item, index) => (
-                  <Cell key={item.symbol} fill={getColor(index)} />
+                  <Cell key={item.symbol} fill={getColor(index)} style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
                 ))}
               </Bar>
             </BarChart>

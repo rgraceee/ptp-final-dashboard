@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import StatCard from "@/components/StatCard";
 import { getQuote, getOverview } from "@/lib/alphaVantage";
+import { TrendingUp, BarChart3, Wallet, DollarSign, AudioLines } from "lucide-react";
 
 function formatMarketCap(raw: string) {
   const num = Number(raw);
@@ -25,20 +27,48 @@ export default async function TickerPage({
   ]);
 
   return (
-    <div className="p-6">
-      <Link href="/dashboard" className="text-sm text-gray-500 hover:underline">
-        ← Back to dashboard
-      </Link>
-      <h1 className="text-xl font-bold mb-4 mt-2 text-gray-900">{quote.symbol}</h1>
-      <div className="flex flex-wrap gap-4">
-        <StatCard
-          label={`${quote.symbol} Price`}
-          value={`$${quote.price}`}
-          change={quote.changePercent}
-        />
-        <StatCard label="Open Price" value={`$${quote.open}`} />
-        <StatCard label="Volume" value={quote.volume} />
-        <StatCard label="Market Cap" value={formatMarketCap(overview.marketCap)} />
+    <div className="min-h-screen gradient-soft">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 mb-6 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          Back to Dashboard
+        </Link>
+
+        <div className="section-header">
+          <h1 className="text-lg font-bold text-gray-900 tracking-tight">{quote.symbol}</h1>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+          <StatCard
+            label={`${quote.symbol} Price`}
+            value={`$${quote.price}`}
+            change={quote.changePercent}
+            icon={<TrendingUp size={18} />}
+            gradient="price"
+            highlight
+          />
+          <StatCard
+            label="Open Price"
+            value={`$${quote.open}`}
+            icon={<BarChart3 size={18} />}
+            gradient="open"
+          />
+          <StatCard
+            label="Volume"
+            value={quote.volume}
+            icon={<AudioLines size={18} />}
+            gradient="volume"
+          />
+          <StatCard
+            label="Market Cap"
+            value={formatMarketCap(overview.marketCap)}
+            icon={<DollarSign size={18} />}
+            gradient="cap"
+          />
+        </div>
       </div>
     </div>
   );

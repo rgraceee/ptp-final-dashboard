@@ -1,12 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --accent: #c2436f;
-  --accent-hover: #a8335c;
-  --accent-light: #f9e4ec;
-  --accent-glow: rgba(194, 67, 111, 0.25);
+  --accent: #8B1A3A;
+  --accent-hover: #721530;
+  --accent-light: #f5e6ea;
+  --accent-glow: rgba(139, 26, 58, 0.25);
+  --accent-soft: rgba(139, 26, 58, 0.06);
   --surface: #ffffff;
-  --surface-raised: #f8f9fb;
+  --surface-raised: #fafbfc;
   --surface-sunken: #f3f4f6;
   --border: #e5e7eb;
   --border-subtle: #f0f1f3;
@@ -17,7 +18,7 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
   --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-accent: 0 8px 24px rgba(194, 67, 111, 0.18);
+  --shadow-accent: 0 8px 24px rgba(139, 26, 58, 0.18);
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 18px;
@@ -36,6 +37,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
 }
+
+/* ─── Card System ──────────────────────────────────────────── */
 
 .card {
   background: var(--surface);
@@ -69,24 +72,38 @@ body {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(194, 67, 111, 0.25), rgba(194, 67, 111, 0.05));
+  background: linear-gradient(135deg, rgba(139, 26, 58, 0.3), rgba(139, 26, 58, 0.05));
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
   -webkit-mask-composite: xor;
   pointer-events: none;
 }
 
-.accent-bar {
-  width: 3px;
+/* ─── Section Header ──────────────────────────────────────── */
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-header::before {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 22px;
   border-radius: 2px;
-  background: linear-gradient(180deg, var(--accent), rgba(194, 67, 111, 0.4));
+  background: linear-gradient(180deg, var(--accent), rgba(139, 26, 58, 0.4));
   flex-shrink: 0;
 }
+
+/* ─── Shimmer / Skeleton ──────────────────────────────────── */
 
 .shimmer {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
+  background: linear-gradient(90deg, #f3f4f6 0%, #ececec 50%, #f3f4f6 100%);
   background-size: 200% 100%;
   animation: shimmer-move 1.6s infinite linear;
   border-radius: var(--radius-sm);
@@ -96,7 +113,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.55) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
   animation: shimmer-sweep 1.6s infinite;
 }
 
@@ -110,10 +127,12 @@ body {
   100% { transform: translateX(100%); }
 }
 
+/* ─── Inputs ──────────────────────────────────────────────── */
+
 .input {
   width: 100%;
   padding: 0.65rem 0.9rem;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
   outline: none;
   font-size: 0.9rem;
@@ -141,6 +160,8 @@ body {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
 }
 
+/* ─── Buttons ─────────────────────────────────────────────── */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -162,14 +183,14 @@ body {
 }
 
 .btn-primary {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0%, #A52A3A 100%);
   color: #fff;
   box-shadow: var(--shadow-sm), 0 0 0 0 var(--accent-glow);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--accent-hover);
-  box-shadow: var(--shadow-md), 0 0 0 6px rgba(194, 67, 111, 0.08);
+  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 100%);
+  box-shadow: var(--shadow-md), 0 0 0 6px rgba(139, 26, 58, 0.08);
   transform: translateY(-1px);
 }
 
@@ -205,10 +226,12 @@ body {
   cursor: not-allowed;
 }
 
+/* ─── Badges ──────────────────────────────────────────────── */
+
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.2rem 0.6rem;
+  padding: 0.25rem 0.7rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -216,14 +239,18 @@ body {
 }
 
 .badge-buy {
-  background: #ecfdf5;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
   color: #065f46;
+  border: 1px solid rgba(6, 95, 70, 0.1);
 }
 
 .badge-sell {
-  background: #fef2f2;
+  background: linear-gradient(135deg, #fef2f2, #fecaca);
   color: #991b1b;
+  border: 1px solid rgba(153, 27, 27, 0.1);
 }
+
+/* ─── Glass ───────────────────────────────────────────────── */
 
 .glass {
   background: rgba(255, 255, 255, 0.72);
@@ -232,17 +259,41 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
+/* ─── Dashboard Background ────────────────────────────────── */
+
 .gradient-soft {
   background:
-    radial-gradient(circle at 10% 20%, rgba(194, 67, 111, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(194, 67, 111, 0.06) 0%, transparent 40%),
-    linear-gradient(180deg, #f8f9fb 0%, #f3f4f6 100%);
+    radial-gradient(ellipse at 0% 0%, rgba(139, 26, 58, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(147, 51, 234, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(139, 26, 58, 0.02) 0%, transparent 70%),
+    linear-gradient(180deg, #fefbfc 0%, #f8f9fb 40%, #f6f5fa 100%);
+  min-height: 100vh;
 }
+
+/* ─── Chart Tooltip ───────────────────────────────────────── */
+
+.chart-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  font-size: 13px !important;
+  padding: 12px 16px !important;
+}
+
+.chart-tooltip .recharts-tooltip-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+/* ─── Animations ──────────────────────────────────────────── */
 
 @keyframes fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -251,15 +302,15 @@ body {
 }
 
 .animate-fade-in-up {
-  animation: fade-in-up 0.35s ease forwards;
+  animation: fade-in-up 0.4s ease forwards;
 }
 
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(194, 67, 111, 0.35);
+    box-shadow: 0 0 0 0 rgba(139, 26, 58, 0.35);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(194, 67, 111, 0);
+    box-shadow: 0 0 0 10px rgba(139, 26, 58, 0);
   }
 }
 
@@ -276,6 +327,24 @@ body {
   animation: float 4s ease-in-out infinite;
 }
 
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-stagger-in {
+  animation: stagger-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+}
+
+/* ─── Glass Card ──────────────────────────────────────────── */
+
 .glass-card {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
@@ -284,22 +353,28 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+/* ─── Nav Shadow ──────────────────────────────────────────── */
+
 .nav-shadow {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
-.stat-gradient-price {
-  background: linear-gradient(135deg, #fff 0%, #fff1f4 60%, #ffeef1 100%);
+/* ─── Scrollbar ───────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.stat-gradient-open {
-  background: linear-gradient(135deg, #fff 0%, #eff6ff 60%, #e0efff 100%);
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.stat-gradient-volume {
-  background: linear-gradient(135deg, #fff 0%, #f0fdf4 60%, #e0fae6 100%);
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
 }
 
-.stat-gradient-cap {
-  background: linear-gradient(135deg, #fff 0%, #faf5ff 60%, #f3e8ff 100%);
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }

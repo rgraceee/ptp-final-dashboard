@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
-import { LogOut, RefreshCw, Search } from "lucide-react";
+import { LogOut, RefreshCw, Search, ChevronDown, TrendingUp } from "lucide-react";
 import Swal from "sweetalert2";
 
 type TopBarProps = {
@@ -36,72 +36,114 @@ export default function TopBar({ userEmail, onRefresh, refreshing, onSearch }: T
       await onRefresh();
       await Swal.fire({
         icon: "success",
-        title: "Data refreshed successfully",
+        title: "Data refreshed",
+        text: "Market data is now up to date.",
         timer: 2000,
         showConfirmButton: false,
         background: "#fff",
         color: "#111827",
         iconColor: "#10b981",
+        customClass: {
+          popup: "!rounded-2xl !border !border-gray-100 !shadow-2xl",
+          title: "!text-lg !font-bold",
+          htmlContainer: "!text-sm !text-gray-500",
+        },
       });
     } catch {
       await Swal.fire({
         icon: "error",
-        title: "You've hit the API limit",
-        text: "Try again later.",
+        title: "Refresh failed",
+        text: "API limit reached. Please try again later.",
         background: "#fff",
         color: "#111827",
         iconColor: "#ef4444",
+        customClass: {
+          popup: "!rounded-2xl !border !border-gray-100 !shadow-2xl",
+          confirmButton: "!rounded-xl !px-5 !py-2.5 !font-semibold !text-sm !bg-[#8B1A3A]",
+          title: "!text-lg !font-bold",
+          htmlContainer: "!text-sm !text-gray-500",
+        },
       });
     }
   }
 
   async function handleSignOut() {
-    await createClient().auth.signOut();
-    router.push("/login");
+    const result = await Swal.fire({
+      title: "Sign out?",
+      text: "You'll need to sign in again to access your dashboard.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#8B1A3A",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, sign me out",
+      cancelButtonText: "Cancel",
+      background: "#fff",
+      color: "#111827",
+      reverseButtons: true,
+      customClass: {
+        popup: "!rounded-2xl !border !border-gray-100 !shadow-2xl",
+        confirmButton: "!rounded-xl !px-5 !py-2.5 !font-semibold !text-sm",
+        cancelButton: "!rounded-xl !px-5 !py-2.5 !font-semibold !text-sm",
+        title: "!text-lg !font-bold",
+        htmlContainer: "!text-sm !text-gray-500",
+      },
+    });
+
+    if (result.isConfirmed) {
+      await createClient().auth.signOut();
+      Swal.fire({
+        title: "Signed out",
+        text: "You've been successfully signed out.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+        background: "#fff",
+        color: "#111827",
+        customClass: {
+          popup: "!rounded-2xl !border !border-gray-100 !shadow-2xl",
+          title: "!text-lg !font-bold",
+        },
+      });
+      router.push("/login");
+    }
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-gray-200/60 bg-transparent backdrop-blur-xl shadow-sm">
+    <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-xl nav-shadow border-b border-gray-100/80">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push("/dashboard")}
-              className="flex items-center gap-2.5 shrink-0 transition-transform duration-200 hover:scale-105"
+              className="flex items-center gap-3 shrink-0 group"
             >
-              <div
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-md transition-shadow duration-200 hover:shadow-lg"
-                style={{ background: "var(--accent)" }}
-              >
-                <span className="text-lg leading-none">📈</span>
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:scale-105"
+                style={{ background: "linear-gradient(135deg, var(--accent), #A52A3A)" }}>
+                <TrendingUp size={20} />
+                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ boxShadow: "0 0 20px rgba(139, 26, 58, 0.3)" }} />
               </div>
               <div className="hidden md:block">
                 <p className="text-sm font-bold text-gray-900 tracking-tight leading-tight">
                   Stock Analytics
                 </p>
-                <p className="text-[11px] text-gray-500 leading-tight">
-                  Portfolio & Market
+                <p className="text-[11px] text-gray-400 leading-tight">
+                  Portfolio & Market Intelligence
                 </p>
               </div>
             </button>
 
-            <div className="hidden md:block h-6 w-px bg-gray-200" />
+            <div className="hidden md:block h-6 w-px bg-gray-200/80" />
 
             <form onSubmit={handleSearchSubmit} className="hidden md:block">
-              <div className="relative">
+              <div className="relative group">
+                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-[var(--accent)]" />
                 <input
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
-                  placeholder="Search ticker..."
-                  className="input h-9 w-64 pr-9 text-sm bg-gray-50/50 hover:bg-white hover:border-gray-300 focus:bg-white focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-glow)] transition-all duration-200"
+                  placeholder="Search any ticker..."
+                  className="h-10 w-64 pl-9 pr-4 rounded-xl border border-gray-200/80 bg-gray-50/50 text-sm outline-none transition-all duration-200 hover:bg-white hover:border-gray-300 focus:bg-white focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-glow)]"
                 />
-                <button
-                  type="submit"
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label="Search ticker"
-                >
-                  <Search size={16} />
-                </button>
               </div>
             </form>
           </div>
@@ -111,44 +153,50 @@ export default function TopBar({ userEmail, onRefresh, refreshing, onSearch }: T
               <button
                 onClick={handleRefreshClick}
                 disabled={refreshing}
-                className="btn btn-ghost h-9 px-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200"
-                title="Refresh data safely (avoids API limit issues)"
+                className="btn btn-ghost h-9 px-3 text-gray-500 hover:text-gray-900 hover:bg-gray-100/80 rounded-xl transition-all duration-200"
+                title="Refresh data"
               >
-                <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
-                <span className="hidden sm:inline text-sm">Refresh stock data</span>
-                <span className="sm:hidden">Refresh</span>
+                <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
+                <span className="hidden sm:inline text-sm">Refresh</span>
               </button>
             )}
 
             <div className="relative">
               <button
                 onClick={() => setShowProfile(!showProfile)}
-                className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2 py-1.5 pr-3 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md hover:scale-[1.02]"
+                className="flex items-center gap-2.5 rounded-xl border border-gray-200/80 bg-white px-2 py-1.5 pr-3 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md hover:bg-gray-50/50"
               >
                 <div
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-white text-sm font-bold"
-                  style={{ background: "var(--accent)" }}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-white text-sm font-bold shadow-sm"
+                  style={{ background: "linear-gradient(135deg, var(--accent), #A52A3A)" }}
                 >
                   {userEmail ? userEmail.charAt(0).toUpperCase() : "U"}
                 </div>
                 <div className="hidden lg:block text-left">
-                  <p className="text-sm font-medium text-gray-800 leading-tight">
+                  <p className="text-sm font-medium text-gray-700 leading-tight max-w-[140px] truncate">
                     {userEmail || "User"}
                   </p>
                 </div>
-                <span className="text-gray-400 text-xs">▾</span>
+                <ChevronDown size={14} className="text-gray-400" />
               </button>
 
               {showProfile && (
-                <div className="absolute right-0 mt-2 w-48 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl animate-fade-in-up">
-                  <button
-                    onClick={handleSignOut}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <LogOut size={16} />
-                    Sign Out
-                  </button>
-                </div>
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowProfile(false)} />
+                  <div className="absolute right-0 mt-2 w-52 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl animate-fade-in-up z-50">
+                    <div className="px-3 py-2 border-b border-gray-100 mb-1">
+                      <p className="text-xs text-gray-400">Signed in as</p>
+                      <p className="text-sm font-medium text-gray-700 truncate">{userEmail}</p>
+                    </div>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut size={15} />
+                      Sign Out
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           </div>
