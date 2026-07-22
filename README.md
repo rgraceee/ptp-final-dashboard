@@ -4,12 +4,12 @@ A full-stack stock analytics dashboard built with Next.js, Supabase, and Alpha V
 
 ## Features
 
-- **Authentication** — Sign up and log in with email/password via Supabase Auth
-- **Live Stock Data** — Real-time quotes, company overviews, and price history from Alpha Vantage
-- **Interactive Charts** — Multiple Recharts chart types (Area, Line, Bar, Pie/Donut)
-- **Personal Records** — Full CRUD for logging investment records (ticker, date, price, category, notes)
-- **Filtering & Aggregation** — Filter records by date range, category, or ticker with computed stats
-- **Ticker Directory** — Browse and compare stock tickers side by side
+- **Authentication** � Sign up and log in with email/password via Supabase Auth
+- **Live Stock Data** � Real-time quotes, company overviews, and price history from Alpha Vantage
+- **Interactive Charts** � Multiple Recharts chart types (Area, Line, Bar, Pie/Donut)
+- **Personal Records** � Full CRUD for logging investment records (ticker, date, price, category, notes)
+- **Filtering & Aggregation** � Filter records by date range, category, or ticker with computed stats
+- **Ticker Directory** � Browse and compare stock tickers side by side
 
 ## Tech Stack
 
@@ -118,50 +118,54 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ```
 ptp-final-dashboard/
-├── app/
-│   ├── api/
-│   │   ├── history/[ticker]/    # Historical daily prices (Alpha Vantage)
-│   │   ├── overview/[ticker]/   # Company fundamentals (Alpha Vantage)
-│   │   ├── quote/[ticker]/      # Real-time quote (Alpha Vantage)
-│   │   ├── records/             # CRUD for user records (Supabase)
-│   │   ├── records/[id]/        # Update/delete individual record
-│   │   ├── records/stats/       # Aggregate stats for records
-│   │   ├── stock/[ticker]/      # Stock data with ticker validation
-│   │   └── ticker/              # Ticker directory listing
-│   ├── dashboard/
-│   │   ├── page.tsx             # Main dashboard with charts & record form
-│   │   ├── records/page.tsx     # Dedicated records management page
-│   │   └── tickers/             # Ticker directory & comparison views
-│   ├── login/page.tsx           # Login page
-│   ├── signup/page.tsx          # Signup page
-│   ├── layout.tsx               # Root layout
-│   └── page.tsx                 # Landing/redirect page
-├── components/
-│   ├── CategoryPieChart.tsx     # Pie chart for category breakdown
-│   ├── LoginForm.tsx            # Auth form (login/signup)
-│   ├── PriceChart.tsx           # Area chart for price history
-│   ├── RecordForm.tsx           # Add/edit records with validation
-│   ├── RecordsFilters.tsx       # Date range, category, ticker filters
-│   ├── RecordsPriceChart.tsx    # Area chart for record prices over time
-│   ├── RecordsStats.tsx         # Summary stat cards
-│   ├── RecordsTable.tsx         # Sortable records table with edit/delete
-│   ├── TickerComparison.tsx     # Line + bar chart for multi-ticker comparison
-│   └── TopBar.tsx               # Navigation bar with sign out
-├── lib/
-│   ├── alphaVantage.ts          # Alpha Vantage API client with caching
-│   ├── RecordsContext.tsx        # React context for records state management
-│   ├── supabase.ts              # Supabase browser client
-│   ├── supabase-server.ts       # Supabase server client
-│   └── types.ts                 # TypeScript type definitions
-└── .env.local                   # Environment variables (gitignored)
++-- app/
+�   +-- api/
+�   �   +-- history/[ticker]/    # Historical daily prices (Alpha Vantage)
+�   �   +-- overview/[ticker]/   # Company fundamentals (Alpha Vantage)
+�   �   +-- quote/[ticker]/      # Real-time quote (Alpha Vantage)
+�   �   +-- records/             # CRUD for user records (Supabase)
+�   �   +-- records/[id]/        # Update/delete individual record
+�   �   +-- records/stats/       # Aggregate stats for records
+�   �   +-- stock/[ticker]/      # Stock data with ticker validation
+�   �   +-- ticker/              # Ticker directory listing
+�   +-- dashboard/
+�   �   +-- page.tsx             # Main dashboard with charts & record form
+�   �   +-- records/page.tsx     # Dedicated records management page
+�   �   +-- tickers/             # Ticker directory & comparison views
+�   +-- layout.tsx               # Root layout
+�   +-- login/page.tsx           # Login page
+�   +-- middleware.ts            # Server-side auth guard (protected routes)
+�   +-- signup/page.tsx          # Signup page
+�   +-- page.tsx                 # Landing/redirect page
++-- components/
+�   +-- ActivityFeed.tsx         # Recent market/record activity list
+�   +-- CategoryPieChart.tsx     # Pie chart for category breakdown
+�   +-- LoginForm.tsx            # Auth form (login/signup)
+�   +-- PriceChart.tsx           # Area chart for price history
+�   +-- RecordForm.tsx           # Add/edit records with validation
+�   +-- RecordsFilters.tsx       # Date range, category, ticker filters
+�   +-- RecordsPriceChart.tsx    # Area chart for record prices over time
+�   +-- RecordsStats.tsx         # Summary stat cards
+�   +-- RecordsTable.tsx         # Sortable records table with edit/delete
+�   +-- StatCard.tsx             # Stat card (price, open, volume, etc.)
+�   +-- TickerComparison.tsx     # Line + bar chart for multi-ticker comparison
+�   +-- Toast.tsx                # Toast notifications
+�   +-- TopBar.tsx               # Navigation bar with sign out
++-- lib/
+�   +-- alphaVantage.ts          # Alpha Vantage API client with caching
+�   +-- RecordsContext.tsx        # React context for records state management
+�   +-- supabase.ts              # Supabase browser client
+�   +-- supabase-server.ts       # Supabase server client
+�   +-- types.ts                 # TypeScript type definitions
++-- .env.local                   # Environment variables (gitignored)
 ```
 
 ### Data Flow
 
-1. **Auth** — Supabase Auth handles sign-up, login, and session management on the client
-2. **Stock Data** — API routes fetch from Alpha Vantage, cache with Next.js ISR (60s for quotes, 6h for history), and return to the client
-3. **Records** — Client sends requests with the Supabase JWT in the `Authorization` header; API routes verify the user server-side before performing any database operation
-4. **Charts** — Recharts components consume processed data and render responsive visualizations
+1. **Auth** � Supabase Auth handles sign-up, login, and session management on the client. Server-side middleware (`middleware.ts`) protects `/dashboard` and redirects unauthenticated users to `/login`.
+2. **Stock Data** � API routes fetch from Alpha Vantage, cache with Next.js ISR (60s for quotes, 6h for history), and return to the client
+3. **Records** � Client sends requests with the Supabase JWT in the `Authorization` header; API routes verify the user server-side before performing any database operation
+4. **Charts** � Recharts components consume processed data and render responsive visualizations
 
 ## Deployment
 
@@ -170,7 +174,7 @@ ptp-final-dashboard/
 1. Push to GitHub
 2. Import the repository on [vercel.com](https://vercel.com)
 3. Add the three environment variables in Vercel project settings
-4. Deploy — Vercel auto-detects the Next.js framework
+4. Deploy � Vercel auto-detects the Next.js framework
 
 ### Scripts
 
